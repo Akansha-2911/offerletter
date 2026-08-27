@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employment Offer Letter – Aparaitech</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:linear-gradient(135deg,#0d2b5e 0%,#1a4a8a 40%,#00aec7 100%);min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:700px;overflow:hidden}
+  .header{background:linear-gradient(135deg,#0d2b5e,#00aec7);padding:28px 32px;text-align:center;position:relative}
+  .header img{height:50px;margin-bottom:8px}
+  .header h1{color:#fff;font-size:20px;font-weight:700}
+  .header p{color:rgba(255,255,255,.8);font-size:12px}
+  .back-btn{position:absolute;top:20px;left:20px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;text-decoration:none;transition:.2s}
+  .back-btn:hover{background:rgba(255,255,255,.3)}
+  .logout-btn{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;cursor:pointer;text-decoration:none}
+  .form-body{padding:32px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{margin-bottom:18px}
+  label{display:block;font-size:12px;font-weight:600;color:#0d2b5e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  input, select{width:100%;padding:11px 14px;border:1.5px solid #dde3f0;border-radius:8px;font-size:14px;color:#222;outline:none;transition:.2s}
+  input:focus, select:focus{border-color:#00aec7;box-shadow:0 0 0 3px rgba(0,174,199,.12)}
+  .btn{width:100%;padding:14px;background:linear-gradient(135deg,#0d2b5e,#00aec7);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;margin-top:8px}
+  .btn:hover{opacity:.9;transform:translateY(-1px)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .note{text-align:center;font-size:12px;color:#888;margin-top:14px}
+  .msg{display:none;margin-top:16px;padding:12px;border-radius:8px;font-size:13px;text-align:center}
+  @media(max-width:600px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <a href="/" class="back-btn">← Back</a>
+    <a href="/logout" class="logout-btn">⎋ Logout</a>
+    <img src="/static/logo.png" alt="Aparaitech Logo" onerror="this.style.display='none'">
+    <h1>Employment Offer Letter</h1>
+    <p>Generate full-time / internship offer letter</p>
+  </div>
+  <div class="form-body">
+    <form action="/generate" method="POST" id="offerForm">
+      <div class="row">
+        <div class="field">
+          <label>Employee Name</label>
+          <input type="text" name="employee_name" placeholder="e.g. Rahul Sharma" required>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="employee@email.com" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>College</label>
+          <input type="text" name="college" placeholder="e.g. MIT Pune" required>
+        </div>
+        <div class="field">
+          <label>Department</label>
+          <input type="text" name="department" placeholder="e.g. Computer Science" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Position</label>
+          <input type="text" name="position" placeholder="e.g. Python Developer" required>
+        </div>
+        <div class="field">
+          <label>Stipend (₹)</label>
+          <input type="text" name="stipend" placeholder="e.g. 15000 or 0" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Joining Date</label>
+          <input type="date" name="joining_date" required>
+        </div>
+        <div class="field">
+          <label>Training End Date</label>
+          <input type="date" name="training_end_date" required>
+        </div>
+      </div>
+            <button type="submit" class="btn" id="genBtn">
+        📄 Generate Offer Letter
+      </button>
+
+      <p class="note">
+        PDF will be automatically downloaded. Email will be sent if address is provided.
+      </p>
+
+      <div id="msg" class="msg"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('offerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('genBtn');
+    const msg = document.getElementById('msg');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Generating...';
+
+    try {
+        const res = await fetch('/generate', {
+            method: 'POST',
+            body: new FormData(this)
+        });
+
+        if (!res.ok) {
+            throw new Error('Server returned ' + res.status);
+        }
+
+        const blob = await res.blob();
+
+        // Download PDF
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        const empName = document.querySelector('[name="employee_name"]')
+            .value
+            .trim()
+            .replace(/\s+/g, '_');
+
+        a.href = url;
+        a.download = empName + '_Aparaitech_Offer.pdf';
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        window.URL.revokeObjectURL(url);
+
+        // Success Message
+        msg.style.display = 'block';
+        msg.style.background = '#e6f9f0';
+        msg.style.color = '#1a7a4a';
+        msg.style.border = '1px solid #a3e4c1';
+        msg.innerHTML =
+            '✅ Offer Letter Generated Successfully!<br>' +
+            '📄 PDF Downloaded Successfully';
+
+        btn.textContent = '✅ Completed';
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 3000);
+
+    } catch (err) {
+        msg.style.display = 'block';
+        msg.style.background = '#fdecea';
+        msg.style.color = '#c0392b';
+        msg.style.border = '1px solid #f5b7b1';
+        msg.innerHTML = '❌ Error: ' + err.message;
+
+        btn.disabled = false;
+        btn.textContent = '📄 Generate Offer Letter';
+    }
+});
+</script>
+
+</body>
+</html>

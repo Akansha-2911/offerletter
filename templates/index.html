@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aparaitech - Document Generator</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:linear-gradient(135deg,#0d2b5e 0%,#1a4a8a 40%,#00aec7 100%);min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:920px;overflow:hidden}
+  .header{background:linear-gradient(135deg,#0d2b5e,#00aec7);padding:28px 32px;text-align:center;position:relative}
+  .header img{height:60px;margin-bottom:10px}
+  .header h1{color:#fff;font-size:22px;font-weight:700;letter-spacing:.5px}
+  .header p{color:rgba(255,255,255,.8);font-size:13px;margin-top:4px}
+  .admin-badge{position:absolute;top:20px;left:20px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600}
+  .logout-btn{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;cursor:pointer;text-decoration:none;transition:.2s}
+  .logout-btn:hover{background:rgba(255,255,255,.25)}
+  .form-body{padding:32px}
+  
+  /* ── NEW: Button Grid ───────────────────────────────────── */
+  .button-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+  .offer-btn{padding:20px;border-radius:12px;text-align:center;cursor:pointer;transition:.3s;text-decoration:none;color:#fff;border:none}
+  .offer-btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,.2)}
+  .btn-primary{background:linear-gradient(135deg,#0d2b5e,#1a4a8a)}
+  .btn-secondary{background:linear-gradient(135deg,#00aec7,#0d2b5e)}
+  .btn-bda{background:linear-gradient(135deg,#176b3a,#00a86b)}
+  .btn-certificates{background:linear-gradient(135deg,#7c46f5,#0d2b5e)}
+  .btn-data{background:linear-gradient(135deg,#087f6b,#0bb58d)}
+  .offer-btn h3{font-size:16px;margin-bottom:6px}
+  .offer-btn p{font-size:12px;opacity:.9}
+  .offer-icon{font-size:28px;margin-bottom:8px}
+  /* ───────────────────────────────────────────────────────── */
+  
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{margin-bottom:18px}
+  label{display:block;font-size:12px;font-weight:600;color:#0d2b5e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  input, select{width:100%;padding:11px 14px;border:1.5px solid #dde3f0;border-radius:8px;font-size:14px;color:#222;outline:none;transition:.2s;background:#fff}
+  input:focus, select:focus{border-color:#00aec7;box-shadow:0 0 0 3px rgba(0,174,199,.12)}
+  .btn{width:100%;padding:14px;background:linear-gradient(135deg,#0d2b5e,#00aec7);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;margin-top:8px;transition:.2s}
+  .btn:hover{opacity:.9;transform:translateY(-1px)}
+  .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .note{text-align:center;font-size:12px;color:#888;margin-top:14px}
+  .msg{display:none;margin-top:16px;padding:12px 16px;border-radius:8px;font-size:13px;text-align:center}
+  .success{background:#e6f9f0;color:#1a7a4a;border:1px solid #a3e4c1}
+  .warning{background:#fff4e5;color:#b35a00;border:1px solid #ffd699}
+  .error{background:#fdecea;color:#c0392b;border:1px solid #f5b7b1}
+  .security-badge{display:inline-flex;align-items:center;gap:6px;background:#e6f9f0;color:#1a7a4a;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;margin-top:10px}
+  .watermark-info{background:#fff4e5;border:1px solid #ffd699;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#b35a00}
+  @media(max-width:600px){.row{grid-template-columns:1fr}.button-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="admin-badge">👤 {{ admin_user }}</div>
+    <a href="/logout" class="logout-btn">⎋ Logout</a>
+    <img src="/static/logo.png" alt="Aparaitech Logo" onerror="this.style.display='none'">
+    <h1>Aparaitech Document Generator</h1>
+    <p>Aparaitech Software Company, Baramati</p>
+    <div class="security-badge">🔒 Non-Editable PDF &nbsp;·&nbsp; AES-256 Protected</div>
+  </div>
+  <div class="form-body">
+    
+    <!-- ── NEW: Two Button Options ─────────────────────────── -->
+    <div class="button-grid">
+      <!-- FIXED: links to the actual form -->
+      <a href="/employment" class="offer-btn btn-primary">
+        <div class="offer-icon">📄</div>
+        <h3>Employment Offer</h3>
+        <p>Full-time / Internship Offer Letter<br>4-6 Month Duration</p>
+      </a>
+      <a href="/bda-employment" class="offer-btn btn-bda">
+        <div class="offer-icon">📈</div>
+        <h3>BDA Offer Letter</h3>
+        <p>Business Development Associate<br>Target-Based · Up to 1 LPA</p>
+      </a>
+      <a href="/live-project" class="offer-btn btn-secondary">
+        <div class="offer-icon">💻</div>
+        <h3>Live Project Offer</h3>
+        <p>3-Month Live Project Program<br>Web Dev / Data Science / AI</p>
+      </a>
+      <a href="/certificates" class="offer-btn btn-certificates">
+        <div class="offer-icon">🏆</div>
+        <h3>All 3 Certificates</h3>
+        <p>Experience + Progress + Completion<br>One Form, One Email</p>
+      </a>
+      <a href="/software-developer-templates" class="offer-btn btn-certificates">
+        <div class="offer-icon">🎓</div>
+        <h3>Software Developer Internship</h3>
+        <p>Completion + Experience + LOR<br>Offline Internship Documents</p>
+      </a>
+      <a href="/admin/data" class="offer-btn btn-data">
+        <div class="offer-icon">📊</div>
+        <h3>Admin Data & Excel</h3>
+        <p>{{ counts.total if counts else 0 }} records stored<br>View sections + Download .xlsx</p>
+      </a>
+    </div>
+    <!-- ───────────────────────────────────────────────────── -->
+    
+    {% if recent_logs %}
+    <div style="border:1px solid #e3e9f2;border-radius:10px;padding:14px;margin-bottom:16px;background:#f8fbff">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px">
+        <b style="font-size:13px;color:#0d2b5e">Recent Generated Documents</b>
+        <a href="/admin/data" style="font-size:11px;font-weight:700;color:#008ba1;text-decoration:none">View all →</a>
+      </div>
+      {% for row in recent_logs[:5] %}
+      <div style="display:grid;grid-template-columns:1fr auto;gap:10px;padding:7px 0;border-top:1px solid #e7edf5;font-size:11px">
+        <span><b>{{ row.name or 'Candidate' }}</b> · {{ row.document_label }}</span><span style="color:#7d889a">{{ row.email_status|upper }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="watermark-info">
+      ℹ️ <b>Watermark:</b> Every generated PDF includes a diagonal logo watermark with "<b>GEN BY: {{ admin_user.upper() }}</b>" and timestamp for audit tracking.
+    </div>
+    
+    <p style="text-align:center;color:#0d2b5e;font-weight:600;margin-bottom:16px">👆 Select a document type above to begin</p>
+    
+  </div>
+</div>
+</body>
+</html>

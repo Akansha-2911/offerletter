@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Project Offer – Aparaitech</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:linear-gradient(135deg,#0d2b5e 0%,#1a4a8a 40%,#00aec7 100%);min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:700px;overflow:hidden}
+  .header{background:linear-gradient(135deg,#00aec7,#0d2b5e);padding:28px 32px;text-align:center;position:relative}
+  .header img{height:60px;margin-bottom:10px}
+  .header h1{color:#fff;font-size:22px;font-weight:700;letter-spacing:.5px}
+  .header p{color:rgba(255,255,255,.8);font-size:13px;margin-top:4px}
+  .admin-badge{position:absolute;top:20px;left:20px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600}
+  .logout-btn{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;cursor:pointer;text-decoration:none;transition:.2s}
+  .logout-btn:hover{background:rgba(255,255,255,.25)}
+  .back-btn{display:inline-block;margin-bottom:16px;color:#0d2b5e;text-decoration:none;font-size:13px;font-weight:600}
+  .back-btn:hover{color:#00aec7}
+  .form-body{padding:32px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{margin-bottom:18px}
+  label{display:block;font-size:12px;font-weight:600;color:#0d2b5e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  input, select{width:100%;padding:11px 14px;border:1.5px solid #dde3f0;border-radius:8px;font-size:14px;color:#222;outline:none;transition:.2s;background:#fff}
+  input:focus, select:focus{border-color:#00aec7;box-shadow:0 0 0 3px rgba(0,174,199,.12)}
+  .btn{width:100%;padding:14px;background:linear-gradient(135deg,#00aec7,#0d2b5e);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;margin-top:8px;transition:.2s}
+  .btn:hover{opacity:.9;transform:translateY(-1px)}
+  .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .note{text-align:center;font-size:12px;color:#888;margin-top:14px}
+  .msg{display:none;margin-top:16px;padding:12px 16px;border-radius:8px;font-size:13px;text-align:center}
+  .success{background:#e6f9f0;color:#1a7a4a;border:1px solid #a3e4c1}
+  .warning{background:#fff4e5;color:#b35a00;border:1px solid #ffd699}
+  .error{background:#fdecea;color:#c0392b;border:1px solid #f5b7b1}
+  .security-badge{display:inline-flex;align-items:center;gap:6px;background:#e6f9f0;color:#1a7a4a;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;margin-top:10px}
+  .program-info{background:#f0f7ff;border:1px solid #dde3f0;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:#0d2b5e}
+  @media(max-width:600px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="admin-badge">👤 {{ admin_user }}</div>
+    <a href="/logout" class="logout-btn">⎋ Logout</a>
+    <img src="/static/logo.png" alt="Aparaitech Logo" onerror="this.style.display='none'">
+    <h1>Live Project Offer Letter</h1>
+    <p>3-Month Program | Aparaitech Software Company</p>
+    <div class="security-badge">🔒 Non-Editable PDF &nbsp;·&nbsp; AES-256 Protected</div>
+  </div>
+  <div class="form-body">
+    <a href="/" class="back-btn">← Back to Dashboard</a>
+    
+    <div class="program-info">
+      <b>📋 Program Details:</b> 3-Month Live Project Program with real-world industry projects. 
+      Includes performance reviews, mentorship, and certificate upon completion.
+    </div>
+    
+    <form id="liveProjectForm" action="/generate-live-project" method="POST">
+      <div class="row">
+        <div class="field">
+          <label>Candidate Name</label>
+          <input type="text" name="candidate_name" placeholder="Full Name" required>
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="candidate@email.com" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>College Name</label>
+          <input type="text" name="college" placeholder="College / University" required>
+        </div>
+        <div class="field">
+          <label>Department</label>
+          <input type="text" name="department" placeholder="e.g. Computer Science" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Domain / Technology</label>
+          <select name="domain" required>
+            <option value="">Select Domain</option>
+            <option value="Web Development">Web Development</option>
+            <option value="Data Science">Data Science</option>
+            <option value="Artificial Intelligence">Artificial Intelligence</option>
+            <option value="Machine Learning">Machine Learning</option>
+            <option value="Cloud Computing">Cloud Computing</option>
+            <option value="Cyber Security">Cyber Security</option>
+            <option value="Mobile App Development">Mobile App Development</option>
+            <option value="Blockchain">Blockchain</option>
+            <option value="Data Analytics">Data Analytics</option>
+            <option value="Java Full Stack">Java FullStack</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Location Mode</label>
+          <select name="location" required>
+            <option value="Online Mode">Online Mode</option>
+            <option value="Hybrid Mode">Hybrid Mode</option>
+            <option value="On-Site (Baramati)">On-Site (Baramati)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Project Start Date</label>
+          <input type="date" name="start_date" required>
+        </div>
+        <div class="field">
+          <label>Project End Date</label>
+          <input type="date" name="end_date" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Stipend (if applicable)</label>
+          <input type="text" name="stipend" placeholder="e.g. 5000 or Unpaid" value="Performance Based">
+        </div>
+      </div>
+      <button class="btn" type="submit" id="btn">Generate Live Project Offer Letter</button>
+    </form>
+    <div id="msg" class="msg"></div>
+    <p class="note">PDF is generated, downloaded & emailed to the candidate automatically.<br>
+    File is <b>non-editable</b> with <b>admin watermark</b> for audit tracking.</p>
+  </div>
+</div>
+
+<script>
+  document.getElementById('liveProjectForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn');
+    const msg = document.getElementById('msg');
+    btn.textContent = '⏳ Generating Secure PDF...'; 
+    btn.disabled = true;
+    msg.style.display = 'none';
+    
+    try {
+      const res = await fetch('/generate-live-project', {method:'POST', body: new FormData(this)});
+      const status = res.headers.get('X-Email-Status');
+      const err = res.headers.get('X-Email-Error');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const candName = document.querySelector('[name="candidate_name"]').value.trim().replace(/\s+/g, '_');
+      a.href = url; 
+      a.download = candName + '_LiveProject_Offer.pdf'; 
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      if (status === 'sent') {
+        msg.className = 'msg success';
+        msg.textContent = '✅ PDF downloaded & emailed to candidate successfully!';
+      } else {
+        msg.className = 'msg warning';
+        msg.textContent = '⚠️ PDF downloaded, but email failed: ' + (err || 'Unknown error');
+      }
+      msg.style.display = 'block';
+    } catch(ex) {
+      msg.className = 'msg error';
+      msg.textContent = '❌ Error: ' + ex.message;
+      msg.style.display = 'block';
+    }
+    btn.textContent = 'Generate Live Project Offer Letter'; 
+    btn.disabled = false;
+  });
+</script>
+</body>
+</html>

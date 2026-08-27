@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BDA Offer Letter - Aparaitech</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(135deg,#0d2b5e 0%,#1a4a8a 45%,#00aec7 100%);min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:820px;overflow:hidden}
+.header{background:linear-gradient(135deg,#0d2b5e,#00aec7);padding:28px 32px;text-align:center;position:relative}
+.header img{height:60px;margin-bottom:10px}.header h1{color:#fff;font-size:22px}.header p{color:rgba(255,255,255,.85);font-size:13px;margin-top:5px}
+.back-btn,.logout-btn{position:absolute;top:20px;color:#fff;padding:6px 13px;border-radius:20px;font-size:11px;text-decoration:none;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3)}
+.back-btn{left:20px}.logout-btn{right:20px}
+.form-body{padding:32px}.info{background:#eef9fb;border:1px solid #b8e7ef;color:#0d5f6c;padding:12px 14px;border-radius:9px;font-size:12px;line-height:1.55;margin-bottom:20px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{margin-bottom:18px}
+label{display:block;font-size:12px;font-weight:700;color:#0d2b5e;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+input,select{width:100%;padding:11px 14px;border:1.5px solid #dde3f0;border-radius:8px;font-size:14px;color:#222;outline:none;background:#fff}
+input:focus,select:focus{border-color:#00aec7;box-shadow:0 0 0 3px rgba(0,174,199,.12)}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#0d2b5e,#00aec7);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn:disabled{opacity:.6}.note{text-align:center;font-size:12px;color:#888;margin-top:14px}.msg{display:none;margin-top:16px;padding:12px;border-radius:8px;font-size:13px;text-align:center}
+@media(max-width:650px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <a href="/" class="back-btn">← Back</a>
+    <a href="/logout" class="logout-btn">⎋ Logout</a>
+    <img src="/static/logo.png" alt="Aparaitech Logo" onerror="this.style.display='none'">
+    <h1>BDA Offer Letter</h1>
+    <p>Business Development Associate · Target-Based Stipend / Incentive</p>
+  </div>
+  <div class="form-body">
+    <div class="info"><b>Compensation model:</b> Target-based stipend / incentive with earning opportunity <b>up to ₹1,00,000 per annum (1 LPA)</b>, subject to verified target achievement and company policy.</div>
+    <form action="/generate-bda" method="POST" id="bdaForm">
+      <div class="row">
+        <div class="field"><label>Candidate Name</label><input type="text" name="employee_name" placeholder="e.g. Rahul Sharma" required></div>
+        <div class="field"><label>Email</label><input type="email" name="email" placeholder="candidate@email.com" required></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>College / Organization</label><input type="text" name="college" placeholder="e.g. ABC College"></div>
+        <div class="field"><label>Department / Qualification</label><input type="text" name="department" placeholder="e.g. BBA / MBA / BE"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Joining Date</label><input type="date" name="joining_date" required></div>
+        <div class="field"><label>Training / Review End Date</label><input type="date" name="training_end_date" required></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Target Framework</label><input type="text" name="monthly_target" value="As assigned by the Business Development Head" required></div>
+        <div class="field"><label>Reporting To</label><input type="text" name="reporting_to" value="Business Development Head / Management" required></div>
+      </div>
+      <div class="field"><label>Work Mode</label><select name="work_mode"><option>On-site</option><option>Hybrid</option><option>Remote</option><option selected>On-site / Hybrid as per business requirement</option></select></div>
+      <button type="submit" class="btn" id="genBtn">📈 Generate BDA Offer Letter</button>
+      <p class="note">PDF will download automatically. Email will also be attempted using configured SMTP.</p>
+      <div id="msg" class="msg"></div>
+    </form>
+  </div>
+</div>
+<script>
+document.getElementById('bdaForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn=document.getElementById('genBtn'); const msg=document.getElementById('msg');
+  btn.disabled=true; btn.textContent='⏳ Generating BDA Offer...';
+  try{
+    const res=await fetch('/generate-bda',{method:'POST',body:new FormData(this)});
+    if(!res.ok) throw new Error('Server returned '+res.status);
+    const blob=await res.blob(); const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    const name=document.querySelector('[name="employee_name"]').value.trim().replace(/\s+/g,'_');
+    a.href=url; a.download=name+'_Aparaitech_BDA_Offer.pdf'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    const emailStatus=res.headers.get('X-Email-Status');
+    msg.style.display='block'; msg.style.background='#e6f9f0'; msg.style.color='#1a7a4a'; msg.style.border='1px solid #a3e4c1';
+    msg.innerHTML='✅ BDA Offer Letter Generated Successfully!<br>📄 PDF Downloaded'+(emailStatus==='sent'?'<br>✉️ Email Sent':'<br>⚠️ Email could not be sent');
+    btn.textContent='✅ Completed';
+    setTimeout(()=>location.reload(),3000);
+  }catch(err){
+    msg.style.display='block'; msg.style.background='#fdecea'; msg.style.color='#c0392b'; msg.style.border='1px solid #f5b7b1'; msg.textContent='❌ Error: '+err.message;
+    btn.disabled=false; btn.textContent='📈 Generate BDA Offer Letter';
+  }
+});
+</script>
+</body>
+</html>
