@@ -420,14 +420,18 @@ Aparaitech – Software & AI Company
             filename=filename
         )
 
-    with smtplib.SMTP(host, port, timeout=10) as server:
-    server.ehlo()
+        try:
+        with smtplib.SMTP(host, port, timeout=10) as server:
+            server.ehlo()
 
-    if use_tls:
-        server.starttls()
-        server.ehlo()
+            if use_tls:
+                server.starttls()
+                server.ehlo()
 
-    if username:
-        server.login(username, password or '')
+            if username:
+                server.login(username, password or '')
 
-    server.send_message(msg)
+            server.send_message(msg)
+
+       except Exception as exc:
+         raise RuntimeError(f"SMTP email sending failed: {exc}") from exc
