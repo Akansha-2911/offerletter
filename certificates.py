@@ -420,11 +420,14 @@ Aparaitech – Software & AI Company
             filename=filename
         )
 
-    with smtplib.SMTP(host, port, timeout=30) as server:
-        if use_tls:
-            server.starttls()
+    with smtplib.SMTP(host, port, timeout=10) as server:
+    server.ehlo()
 
-        if username:
-            server.login(username, password or '')
+    if use_tls:
+        server.starttls()
+        server.ehlo()
 
-        server.send_message(msg)
+    if username:
+        server.login(username, password or '')
+
+    server.send_message(msg)
