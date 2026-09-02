@@ -419,8 +419,7 @@ Aparaitech – Software & AI Company
             subtype='pdf',
             filename=filename
         )
-
-        try:
+    try:
         with smtplib.SMTP(host, port, timeout=10) as server:
             server.ehlo()
 
@@ -433,5 +432,5 @@ Aparaitech – Software & AI Company
 
             server.send_message(msg)
 
-       except Exception as exc:
-         raise RuntimeError(f"SMTP email sending failed: {exc}") from exc
+    except Exception as exc:
+        raise RuntimeError(f"SMTP email sending failed: {exc}") from exc
