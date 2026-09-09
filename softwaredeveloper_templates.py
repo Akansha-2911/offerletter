@@ -327,30 +327,150 @@ def build_software_developer_template_bundle(raw: Mapping, base_dir) -> Tuple[di
     return data, files
 
 
-def send_software_developer_template_email(to_email, candidate_name, files: SoftwareDevFiles, smtp_config: Mapping):
+def send_software_developer_template_email(
+    to_email,
+    candidate_name,
+    files: SoftwareDevFiles,
+    smtp_config: Mapping
+):
     host = smtp_config.get('host') or smtp_config.get('SMTP_HOST')
     port = int(smtp_config.get('port') or smtp_config.get('SMTP_PORT') or 587)
-    username = smtp_config.get('username') or smtp_config.get('user') or smtp_config.get('SMTP_USERNAME') or smtp_config.get('SMTP_USER')
-    password = smtp_config.get('password') or smtp_config.get('pass') or smtp_config.get('SMTP_PASSWORD') or smtp_config.get('SMTP_PASS')
-    sender = smtp_config.get('sender') or smtp_config.get('from') or smtp_config.get('SMTP_SENDER') or smtp_config.get('SMTP_FROM') or username
+
+    username = (
+        smtp_config.get('username')
+        or smtp_config.get('user')
+        or smtp_config.get('SMTP_USERNAME')
+        or smtp_config.get('SMTP_USER')
+    )
+
+    password = (
+        smtp_config.get('password')
+        or smtp_config.get('pass')
+        or smtp_config.get('SMTP_PASSWORD')
+        or smtp_config.get('SMTP_PASS')
+    )
+
+    sender = (
+        smtp_config.get('sender')
+        or smtp_config.get('from')
+        or smtp_config.get('SMTP_SENDER')
+        or smtp_config.get('SMTP_FROM')
+        or username
+    )
+
+    use_tls = smtp_config.get(
+        'use_tls',
+        smtp_config.get('SMTP_USE_TLS', True)
+    )
+
+    use_ssl = smtp_config.get(
+        'use_ssl',
+        smtp_config.get('SMTP_USE_SSL', False)
+    )
+
+    if isinstance(use_tls, str):
+        use_tls = use_tls.strip().lower() in ('1', 'true', 'yes', 'on')
+
+    if isinstance(use_ssl, str):
+        use_ssl = use_ssl.strip().lower() in ('1', 'true', 'yes', 'on')
+
+    if port == 465:
+        use_ssl = True
+        use_tls = False
+
+    if port == 587 and not use_ssl:
+        use_tls = True
+
     if not host or not sender:
         raise ValueError('SMTP configuration is incomplete.')
 
+    if not username or not password:
+        raise ValueError('SMTP username/password is missing.')
+
     first = candidate_name.split()[0] if candidate_name else 'Candidate'
+
     msg = EmailMessage()
-    msg['Subject'] = f'Software Developer Internship Documents – {candidate_name} | Aparaitech Software'
+
+    msg['Subject'] = (
+        f'Software Developer Internship Documents – '
+        f'{candidate_name} | Aparaitech Software'
+    )
+
     msg['From'] = sender
     msg['To'] = to_email
-    msg.set_content(
-        f"Dear {first},\n\nCongratulations on completing your offline Software Developer Internship with Aparaitech Software.\n\n"
-        "Please find attached your Completion Certificate, Internship Experience Letter, and Letter of Recommendation.\n\n"
-        "Regards,\nTeam Aparaitech Software"
-    )
-    for _, (filename, payload) in files.items():
-        msg.add_attachment(payload, maintype='application', subtype='pdf', filename=filename)
 
-    with smtplib.SMTP(host, port, timeout=30) as server:
-        server.starttls()
-        if username:
-            server.login(username, password or '')
+    msg.set_content(
+        f"Dear {first},\n\n"
+        "Congratulations on completing your offline Software Developer Internship with Aparaitech Software.\n\n"
+        "Please find attached your Completion Certificate, Internship Experience Letter, and Letter of Recommendation.\n\n"
+        "Regards,\n"
+        "Team Aparaitech Software"
+    )
+
+    for _, (filename, payload) in files.items():
+        msg.add_attachment(
+            payload,
+            maintype='application',
+            subtype='pdf',
+            filename=filename
+        )
+
+    server = None
+
+    try:
+        if use_ssl:
+            server = smtplib.SMTP_SSL(
+                host,
+                port,
+                timeout=30
+            )
+        else:
+            server = smtplib.SMTP(
+                host,
+                port,
+                timeout=30
+            )
+
+            server.ehlo()
+
+            if use_tls:
+                server.starttls()
+                server.ehlo()
+
+        server.login(
+            username,
+            password
+        )
+
         server.send_message(msg)
+
+    except smtplib.SMTPAuthenticationError as exc:
+        raise RuntimeError(
+            'SMTP authentication failed. Check SMTP_USER and SMTP_PASS/App Password.'
+        ) from exc
+
+    except smtplib.SMTPServerDisconnected as exc:
+        raise RuntimeError(
+            f'SMTP server disconnected unexpectedly: {exc}'
+        ) from exc
+
+    except smtplib.SMTPException as exc:
+        raise RuntimeError(
+            f'SMTP email sending failed: {exc}'
+        ) from exc
+
+    except (TimeoutError, OSError) as exc:
+        raise RuntimeError(
+            f'SMTP connection failed to {host}:{port}: {exc}'
+        ) from exc
+
+    finally:
+        if server is not None:
+            try:
+                if getattr(server, 'sock', None) is not None:
+                    server.quit()
+            except Exception:
+                try:
+                    server.close()
+                except Exception:
+                    pass

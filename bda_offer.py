@@ -13,7 +13,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas as rl_canvas
-from reportlab.platypus import BaseDocTemplate, Frame, KeepTogether, PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle, Flowable
+from reportlab.platypus import BaseDocTemplate, Frame, PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle, Flowable
 
 W, H = A4
 DARK = colors.HexColor('#0d2b5e')
@@ -57,14 +57,11 @@ def _draw_page(c, doc, base_dir):
     c.setFillColor(CYAN)
     c.drawRightString(W - 30, H - 62, 'We Build Your Vision')
 
-    c.setStrokeColor(CYAN)
-    c.setLineWidth(1)
-    c.line(40, 52, W - 40, 52)
     c.setFont('Helvetica', 7.5)
     c.setFillColor(GREY)
     c.drawCentredString(
         W / 2, 38,
-        'Baramati, Pune - 413102, Maharashtra  |  '
+        '122, Gera Imperial Rise, Wipro Circle, Hinjewadi Phase 2, Pune  |  '
         'info@ai.aparaitech.org  |  www.aparaitech.org'
     )
     c.setFont('Helvetica', 8)
@@ -112,15 +109,16 @@ class _SignatureBlock(Flowable):
         if self.sig_path and os.path.exists(self.sig_path):
             c.drawImage(
                 self.sig_path, 0, 0.92 * inch,
-                width=1.5 * inch, height=0.58 * inch,
+                width=1.45 * inch, height=0.56 * inch,
                 preserveAspectRatio=True, mask='auto'
             )
         if self.stamp_path and os.path.exists(self.stamp_path):
             c.drawImage(
-                self.stamp_path, 1.52 * inch, 0.62 * inch,
-                width=1.0 * inch, height=1.0 * inch,
+                self.stamp_path, 0.92 * inch, 0.60 * inch,
+                width=0.98 * inch, height=0.98 * inch,
                 preserveAspectRatio=True, mask='auto'
             )
+
         c.setFont('Courier', 7.8)
         c.setFillColor(GREY)
         c.drawString(0, 0.55 * inch, 'Digitally Signed by')
@@ -152,13 +150,16 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'bda-right', fontSize=9.3, fontName='Helvetica',
         textColor=colors.black, alignment=TA_RIGHT
     )
+    section = ParagraphStyle(
+        'bda-section', fontSize=9.4, fontName='Helvetica', leading=13,
+        textColor=colors.black, alignment=TA_JUSTIFY, spaceAfter=3
+    )
 
     def sec(n, head, text):
-        return KeepTogether([
-            Paragraph(f'<b>{n}. {head}</b>', bold),
-            Paragraph(text, body),
-            Spacer(1, 4),
-        ])
+        title_html = f'<font name="Helvetica-Bold" color="#0d2b5e">{n}. {head}</font>'
+        return [
+            Paragraph(f'{title_html}<br/>{text}', section),
+        ]
 
     employee_name = (data.get('employee_name') or 'Candidate').strip()
     email = (data.get('email') or '').strip()
@@ -234,7 +235,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
     ))
     story.append(Spacer(1, 5))
 
-    story.append(sec(
+    story.extend(sec(
         '1', 'Position &amp; Reporting',
         f'You are appointed as <b>Business Development Associate (BDA)</b> '
         f'and will report to <b>{reporting_to}</b>. Your work mode will be '
@@ -243,9 +244,11 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'activities depending on organizational requirements.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '2', 'Joining / Training Period',
         f'&#x2022; <b>Joining Date:</b> {joining}<br/>'
+        '&#x2022; <b>Joining Location:</b> 122, Gera Imperial Rise, Wipro Circle, '
+        'Hinjewadi Phase 2, Pune<br/>'
         f'&#x2022; <b>Training / Review End Date:</b> {end_date}<br/>'
         'The initial period will be treated as a training/probation and '
         'performance-evaluation period. Continuation will depend on '
@@ -253,7 +256,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'target performance.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '3', 'Roles &amp; Responsibilities',
         '&#x2022; Generate and qualify business leads through approved channels.<br/>'
         '&#x2022; Conduct professional calls, messages, follow-ups, and '
@@ -268,7 +271,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'business and customer information.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '4', 'Target-Based Stipend &amp; Incentive Structure',
         'This is a <b>target-linked performance role</b>. The stipend / '
         'incentive payable to you will be determined on the basis of '
@@ -288,7 +291,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'performance, business needs, and organizational considerations.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '5', 'Business Targets &amp; Performance Review',
         f'<b>Current Target Framework:</b> {monthly_target}. Targets may be '
         'assigned daily, weekly, monthly, campaign-wise, or conversion-wise. '
@@ -298,16 +301,17 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'target achievement and incentives.'
     ))
 
-    # Requested additional points, matching the provided format.
-    story.append(sec(
-        '6', 'Working Hours &amp; Attendance',
-        'The company follows a <b>6-day work week (9 hours/day)</b>, '
-        '<b>Monday through Saturday, 10:00 AM to 7:30 PM</b>. You may be '
-        'required to work additional hours during critical project phases '
-        'or business requirements. Regular and punctual attendance is essential.'
+    story.extend(sec(
+    '6', 'Working Hours &amp; Attendance',
+    'The company follows a <b>6-day working schedule (9 hours/day)</b>. '
+    'The weekly working schedule and <b>one weekly day-off</b> will be '
+    'decided and assigned by the company as per business requirements, '
+    'operational needs, and management discretion. Employees may be required '
+    'to work additional hours during critical project phases or business '
+    'requirements. Regular and punctual attendance is essential.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '7', 'Leave Entitlement',
         'As this is a training and internship program, interns are expected '
         'to maintain regular attendance throughout the internship period. '
@@ -316,7 +320,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'the intern\'s performance evaluation and eligibility for Full time employment.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '8', 'Notice Period &amp; Termination',
         'Either the Intern or the Company may terminate the internship by '
         'providing <b>15 days\' prior written notice</b> to the other party. '
@@ -327,7 +331,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         '(Indian Rupees)</b> to the Company.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '9', 'Confidentiality &amp; Intellectual Property',
         'During the course of your employment and thereafter, you shall '
         'maintain strict confidentiality regarding all proprietary information, '
@@ -337,7 +341,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'company.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '10', 'Code of Conduct',
         'You are expected to conduct yourself professionally and ethically '
         'at all times. You shall comply with all company policies, rules, '
@@ -345,7 +349,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         'violation may result in disciplinary action.'
     ))
 
-    story.append(sec(
+    story.extend(sec(
         '11', 'MANDATORY DOCUMENTS – JOINING DAY CHECKLIST',
         '&#x2022; <b>Signed Offer Letter:</b> 1 copy signed on all pages.<br/>'
         '&#x2022; <b>Academic Records:</b> SSC, HSC, and Degree/Diploma '
@@ -375,7 +379,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
     story.append(Spacer(1, 5))
     story.append(_SignatureBlock(
         _gp(base_dir, 'signature.png'),
-        _gp(base_dir, 'stamp.png')
+        _gp(base_dir, 'stamp1.png')
     ))
 
     # Candidate acceptance page

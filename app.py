@@ -46,6 +46,8 @@ SMTP_PORT     = int(os.environ.get("SMTP_PORT", 587))
 SMTP_USER     = os.environ.get("SMTP_USER", "your@gmail.com")
 SMTP_PASS     = os.environ.get("SMTP_PASS", "your_app_password")
 SMTP_FROM     = os.environ.get("SMTP_FROM", SMTP_USER)
+SMTP_USE_TLS  = os.environ.get("SMTP_USE_TLS", "true").strip().lower() in ("1", "true", "yes", "on")
+SMTP_USE_SSL  = os.environ.get("SMTP_USE_SSL", "false").strip().lower() in ("1", "true", "yes", "on")
 # ─────────────────────────────────────────────────────────────
 
 # ── PDF SECURITY ─────────────────────────────────────────────
@@ -398,11 +400,28 @@ www.aparaitech.org
     )
     msg.attach(part)
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.ehlo()
-        server.starttls()
+    server = None
+    try:
+        if SMTP_USE_SSL or SMTP_PORT == 465:
+            server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=30)
+        else:
+            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30)
+            server.ehlo()
+            if SMTP_USE_TLS:
+                server.starttls()
+                server.ehlo()
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(SMTP_FROM, to_email, msg.as_string())
+    finally:
+        if server is not None:
+            try:
+                if getattr(server, "sock", None) is not None:
+                    server.quit()
+            except Exception:
+                try:
+                    server.close()
+                except Exception:
+                    pass
 def send_bda_offer_email(to_email, candidate_name, pdf_buf, fname):
     msg = MIMEMultipart()
     msg['From'] = SMTP_FROM
@@ -421,14 +440,14 @@ Stipend: Up to INR 15,000 per month, based on achievement of applicable targets 
 
 Upon successfully completing the training period and meeting the required performance standards, you may be considered for a full-time employment opportunity with the company. The full-time position may offer a CTC of up to INR 4.5 LPA to INR 5 LPA, subject to performance, eligibility, role requirements, management evaluation, and company policies.
 
-Please find your revised BDA Offer Letter attached. Kindly check the revised offer letter carefully, sign it, and revert back to this email with the signed copy as soon as possible.
+Please find your BDA Offer Letter attached. Kindly check the offer letter carefully, sign it, and revert back to this email with the signed copy as soon as possible.
 
 We look forward to your contribution to the growth of Aparaitech Software.
 
 Warm regards,
 HR Department
 Aparaitech Software Company
-Baramati, Pune - 413102
+Hinjewadi, Pune - 411057
 info@ai.aparaitech.org | www.aparaitech.org
 """
 
@@ -441,11 +460,28 @@ info@ai.aparaitech.org | www.aparaitech.org
     part.add_header('Content-Disposition', f'attachment; filename="{fname}"')
     msg.attach(part)
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.ehlo()
-        server.starttls()
+    server = None
+    try:
+        if SMTP_USE_SSL or SMTP_PORT == 465:
+            server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=30)
+        else:
+            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30)
+            server.ehlo()
+            if SMTP_USE_TLS:
+                server.starttls()
+                server.ehlo()
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(SMTP_FROM, to_email, msg.as_string())
+    finally:
+        if server is not None:
+            try:
+                if getattr(server, "sock", None) is not None:
+                    server.quit()
+            except Exception:
+                try:
+                    server.close()
+                except Exception:
+                    pass
 
 
 
@@ -456,7 +492,8 @@ def smtp_config():
         "username": SMTP_USER,
         "password": SMTP_PASS,
         "sender": SMTP_FROM,
-        "use_tls": True,
+        "use_tls": SMTP_USE_TLS,
+        "use_ssl": SMTP_USE_SSL,
     }
 
 
@@ -733,7 +770,9 @@ def generate_live_project():
                 'port': SMTP_PORT,
                 'user': SMTP_USER,
                 'pass': SMTP_PASS,
-                'from': SMTP_FROM
+                'from': SMTP_FROM,
+                'use_tls': SMTP_USE_TLS,
+                'use_ssl': SMTP_USE_SSL
             }
             send_live_project_email(data['email'], data['candidate_name'], buf, fname, smtp_config)
         except Exception as e:
