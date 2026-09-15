@@ -1519,11 +1519,6 @@ Aparaitech – Software & AI Company
 
             filename=filename
         )
-    try:
-        with smtplib.SMTP(host, port, timeout=10) as server:
-            server.ehlo()
-
-
     # --------------------------------------------------------
     # SEND EMAIL
     # --------------------------------------------------------
