@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import io
 import os
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import datetime, timezone, timedelta
 
 from PIL import Image as PILImage
 from reportlab.lib import colors
@@ -19,7 +18,7 @@ W, H = A4
 DARK = colors.HexColor('#0d2b5e')
 CYAN = colors.HexColor('#00aec7')
 GREY = colors.HexColor('#555555')
-IST = ZoneInfo('Asia/Kolkata')
+IST = timezone(timedelta(hours=5, minutes=30))
 
 
 def _now_ist():

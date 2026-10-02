@@ -750,40 +750,44 @@ def bda_employment_form():
 @login_required
 def generate_bda():
     """Generate a dedicated target-based BDA offer letter PDF."""
-    keys = [
-        "employee_name", "email", "college", "department", "joining_date",
-        "training_end_date", "monthly_target", "reporting_to", "work_mode",
-    ]
-    data = {k: request.form.get(k, '') for k in keys}
-    admin_user = session.get('admin_user', 'ADMIN')
+    try:
+        keys = [
+            "employee_name", "email", "college", "department", "joining_date",
+            "training_end_date", "monthly_target", "reporting_to", "work_mode",
+        ]
+        data = {k: request.form.get(k, '') for k in keys}
+        admin_user = session.get('admin_user', 'ADMIN')
 
-    buf = build_bda_pdf(
-        data,
-        base_dir=BASE_DIR,
-        admin_user=admin_user,
-        owner_password=PDF_OWNER_PASSWORD,
-    )
-    safe_name = re.sub(r'[^A-Za-z0-9_-]+', '_', data.get('employee_name') or 'Candidate').strip('_')
-    fname = f"{safe_name}_Aparaitech_BDA_Offer.pdf"
+        buf = build_bda_pdf(
+            data,
+            base_dir=BASE_DIR,
+            admin_user=admin_user,
+            owner_password=PDF_OWNER_PASSWORD,
+        )
+        safe_name = re.sub(r'[^A-Za-z0-9_-]+', '_', data.get('employee_name') or 'Candidate').strip('_')
+        fname = f"{safe_name}_Aparaitech_BDA_Offer.pdf"
 
-    email_status = "sent"
-    email_error = ""
-    if data.get('email'):
-        try:
-            buf.seek(0)
-            send_bda_offer_email(data['email'], data['employee_name'], buf, fname)
-        except Exception as exc:
-            email_status = "failed"
-            email_error = str(exc)
+        email_status = "sent"
+        email_error = ""
+        if data.get('email'):
+            try:
+                buf.seek(0)
+                send_bda_offer_email(data['email'], data['employee_name'], buf, fname)
+            except Exception as exc:
+                email_status = "failed"
+                email_error = str(exc)
 
-    log_generated_document("bda_offer", data, email_status=email_status, email_error=email_error, filename=fname)
-    buf.seek(0)
-    response = send_file(buf, as_attachment=True, download_name=fname, mimetype="application/pdf")
-    response.headers['X-Email-Status'] = email_status
-    response.headers['X-Email-Error'] = email_error
-    response.headers['X-Filename'] = fname
-    response.headers['Access-Control-Expose-Headers'] = 'X-Email-Status, X-Email-Error, X-Filename'
-    return response
+        log_generated_document("bda_offer", data, email_status=email_status, email_error=email_error, filename=fname)
+        buf.seek(0)
+        response = send_file(buf, as_attachment=True, download_name=fname, mimetype="application/pdf")
+        response.headers['X-Email-Status'] = email_status
+        response.headers['X-Email-Error'] = email_error
+        response.headers['X-Filename'] = fname
+        response.headers['Access-Control-Expose-Headers'] = 'X-Email-Status, X-Email-Error, X-Filename'
+        return response
+    except Exception as exc:
+        app.logger.exception("Failed to generate BDA offer letter")
+        return jsonify({"ok": False, "error": str(exc)}), 500
 
     # ── LIVE PROJECT ROUTES ──────────────────────────────────────
 
