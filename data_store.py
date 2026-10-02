@@ -24,6 +24,7 @@ DOCUMENT_TYPES = {
     "live_project_offer": "Live Project Offers",
     "certificates": "Certificates",
     "software_developer": "Software Developer Documents",
+    "business_development": "Business Development Documents",
 }
 
 
@@ -141,6 +142,35 @@ def list_document_logs(document_type=None, limit=500):
         records = [r for r in records if r.get("document_type") == document_type]
     records.sort(key=lambda r: r.get("created_at", ""), reverse=True)
     return records[:limit]
+
+
+def delete_document_log(record_id):
+    """Delete a document record by record_id from MongoDB and local JSON fallback."""
+    if not record_id:
+        return False
+
+    deleted_mongo = False
+    collection = _mongo_collection()
+    if collection is not None:
+        try:
+            res = collection.delete_one({"record_id": str(record_id)})
+            deleted_mongo = (res.deleted_count > 0)
+        except Exception:
+            pass
+
+    deleted_local = False
+    try:
+        with _LOCK:
+            records = _read_local()
+            initial_count = len(records)
+            records = [r for r in records if r.get("record_id") != str(record_id)]
+            if len(records) < initial_count:
+                _write_local(records)
+                deleted_local = True
+    except Exception:
+        pass
+
+    return deleted_mongo or deleted_local
 
 
 def dashboard_counts():

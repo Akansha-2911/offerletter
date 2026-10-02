@@ -61,7 +61,7 @@ def _draw_page(c, doc, base_dir):
     c.setFillColor(GREY)
     c.drawCentredString(
         W / 2, 38,
-        '122, Gera Imperial Rise, Wipro Circle, Hinjewadi Phase 2, Pune  |  '
+        '122, Gera Imperial Rise, Wipro Circle, Hinjewadi Phase 2, Pune - 411057  |  '
         'info@ai.aparaitech.org  |  www.aparaitech.org'
     )
     c.setFont('Helvetica', 8)
@@ -248,7 +248,7 @@ def build_bda_pdf(data, base_dir, admin_user='ADMIN',
         '2', 'Joining / Training Period',
         f'&#x2022; <b>Joining Date:</b> {joining}<br/>'
         '&#x2022; <b>Joining Location:</b> 122, Gera Imperial Rise, Wipro Circle, '
-        'Hinjewadi Phase 2, Pune<br/>'
+        'Hinjewadi Phase 2, Pune - 411057<br/>'
         f'&#x2022; <b>Training / Review End Date:</b> {end_date}<br/>'
         'The initial period will be treated as a training/probation and '
         'performance-evaluation period. Continuation will depend on '

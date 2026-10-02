@@ -27,9 +27,8 @@ FORM_DATA = {
 
 class AppCertificateTests(unittest.TestCase):
     def setUp(self):
-        app_module.app.config.update(TESTING=True)
         self.client = app_module.app.test_client()
-        self.client.post("/login", data={"uid": "test-admin", "password": "test-password"})
+        self.client.post("/login", data={"uid": app_module.LOGIN_USER, "password": app_module.LOGIN_PASS})
 
     def test_certificate_page_is_available_after_login(self):
         response = self.client.get("/certificates")
@@ -48,6 +47,40 @@ class AppCertificateTests(unittest.TestCase):
             self.assertTrue(all(name.endswith(".pdf") for name in names))
             self.assertTrue(all(archive.read(name).startswith(b"%PDF") for name in names))
         mocked_email.assert_called_once()
+
+    def test_admin_data_page_has_delete_buttons(self):
+        response = self.client.get("/admin/data")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Delete", response.data)
+        self.assertIn(b"Action", response.data)
+
+    def test_delete_admin_data_record(self):
+        # Create a test log record
+        from data_store import save_document_log, list_document_logs, delete_document_log
+        save_document_log(
+            "employment_offer",
+            {"employee_name": "Test Delete Candidate", "email": "delete_me@example.com"},
+            admin_user="test-admin",
+            filename="Test_Delete.pdf"
+        )
+        logs = list_document_logs("employment_offer")
+        target = next((r for r in logs if r.get("email") == "delete_me@example.com"), None)
+        self.assertIsNotNone(target)
+        rec_id = target["record_id"]
+
+        # Call delete endpoint via AJAX
+        res = self.client.post(
+            f"/admin/data/delete/{rec_id}",
+            headers={"X-Requested-With": "XMLHttpRequest"}
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertTrue(data.get("ok"))
+
+        # Verify record no longer exists
+        remaining = [r for r in list_document_logs() if r.get("record_id") == rec_id]
+        self.assertEqual(len(remaining), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

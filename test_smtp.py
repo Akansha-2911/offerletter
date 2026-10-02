@@ -16,7 +16,8 @@ try:
     server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
     server.login(SMTP_USER, SMTP_PASS)
-    print("✅ LOGIN SUCCESSFUL!")
+    print("[OK] LOGIN SUCCESSFUL!")
     server.quit()
 except Exception as e:
-    print(f"❌ FAILED: {e}")
+    print(f"[FAILED]: {e}")
+

@@ -18,7 +18,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
 
-SoftwareDevFiles = Dict[str, Tuple[str, bytes]]
+BusinessDevFiles = Dict[str, Tuple[str, bytes]]
 
 COMPLETION_REF = (2048, 1452)
 EXPERIENCE_REF = (1165, 1555)
@@ -122,7 +122,7 @@ def _credential(name, end_date, supplied=''):
     if supplied:
         return supplied[:32]
     d = _parse_date(end_date, date.today())
-    digest = sha256(f'{name}|software-developer-offline|{d.isoformat()}'.encode()).hexdigest()
+    digest = sha256(f'{name}|business-development-offline|{d.isoformat()}'.encode()).hexdigest()
     return f'APAR{d.strftime("%y%m")}{int(digest[:8], 16) % 10000:04d}'
 
 
@@ -147,9 +147,10 @@ def normalize_data(raw: Mapping) -> dict:
         'start_date': start,
         'end_date': end,
         'issue_date': issue,
-        'role': str(raw.get('role') or 'Software Developer Intern').strip(),
-        'domain': str(raw.get('domain') or 'Software Development').strip(),
+        'role': str(raw.get('role') or 'Business Development Intern').strip(),
+        'domain': str(raw.get('domain') or 'Business Development').strip(),
         'mode': 'offline',
+        'location': 'Baramati, Pune',
         'credential_id': _credential(name, end, raw.get('credential_id')),
     }
 
@@ -205,13 +206,13 @@ def _paragraph(c, html, x, top, width, ref, page, font, size_px, leading_px, ali
     return h
 
 
-def build_software_dev_completion(data, base_dir):
+def build_bd_completion(data, base_dir):
     out = BytesIO()
     c = canvas.Canvas(out, pagesize=COMPLETION_PAGE)
-    c.setTitle('Software Developer Internship Completion Certificate')
+    c.setTitle('Business Development Internship Completion Certificate')
     _draw_bg(c, base_dir, 'software_dev_completion_template_exact.png', COMPLETION_PAGE)
 
-    # Remove only the variable content from the supplied reference while preserving its exact frame/header/signature/stamp.
+    # Remove variable content while preserving frame, header, signature, and stamp.
     _rect_from_top(c, 690, 700, 700, 150, COMPLETION_REF, COMPLETION_PAGE, colors.HexColor('#F5F5F5'))
     _rect_from_top(c, 155, 852, 1740, 260, COMPLETION_REF, COMPLETION_PAGE, colors.HexColor('#F5F5F5'))
     _rect_from_top(c, 1450, 1160, 370, 100, COMPLETION_REF, COMPLETION_PAGE, colors.HexColor('#F5F5F5'))
@@ -220,8 +221,8 @@ def build_software_dev_completion(data, base_dir):
     body = (
         f"This is to certify that the individual has completed an internship with <b>Aparaitech Software</b> as a "
         f"<b>{data['role']}</b>. During the period from <b>{_date_long_portable(data['start_date'])} to "
-        f"{_date_long_portable(data['end_date'])}</b>, they worked in <b>offline mode</b> and demonstrated strong "
-        "technical skills, professionalism, discipline, and dedication to assigned responsibilities."
+        f"{_date_long_portable(data['end_date'])}</b>, they worked in <b>offline mode</b> at our <b>Baramati, Pune</b> office "
+        "and demonstrated strong communication skills, strategic market outreach, professionalism, discipline, and dedication to assigned responsibilities."
     )
     _paragraph(c, body, 190, 876, 1660, COMPLETION_REF, COMPLETION_PAGE, SANS, 29, 52, TA_CENTER)
     _text_left(c, f"Issued Date: {_date_long_portable(data['issue_date'])}", 1480, 1196, SANS_BOLD, 20, COMPLETION_REF, COMPLETION_PAGE)
@@ -231,13 +232,12 @@ def build_software_dev_completion(data, base_dir):
     return out.getvalue()
 
 
-def build_software_dev_experience(data, base_dir):
+def build_bd_experience(data, base_dir):
     out = BytesIO()
     c = canvas.Canvas(out, pagesize=EXPERIENCE_PAGE)
-    c.setTitle('Software Developer Internship Experience Letter')
+    c.setTitle('Business Development Internship Experience Letter')
     _draw_bg(c, base_dir, 'software_dev_experience_template_exact.png', EXPERIENCE_PAGE)
 
-    # The uploaded design is retained exactly; only its sample date/name/body are replaced.
     _rect_from_top(c, 875, 450, 190, 65, EXPERIENCE_REF, EXPERIENCE_PAGE)
     _rect_from_top(c, 105, 590, 950, 600, EXPERIENCE_REF, EXPERIENCE_PAGE)
 
@@ -246,16 +246,16 @@ def build_software_dev_experience(data, base_dir):
 
     p1 = (
         f"This is to certify that <b>{data['candidate_name']}</b> has successfully completed a "
-        f"<b>Software Developer Internship</b> at <b>Aparaitech Software</b> from "
+        f"<b>Business Development Internship</b> at <b>Aparaitech Software</b> from "
         f"<b>{_date_ordinal(data['start_date'])} to {_date_ordinal(data['end_date'])}</b>."
     )
     p2 = "The internship was conducted <b>offline</b> at the company work location in <b>Baramati, Pune</b>."
     p3 = (
-        "During this period, the intern actively worked on real-time software development assignments, "
-        "demonstrating technical skills, dedication, professional conduct, teamwork, and a willingness to learn. "
-        "They gained practical exposure to development, debugging, testing, and project implementation."
+        "During this period, the intern actively contributed to lead generation, market analysis, client outreach, "
+        "strategic business communications, and corporate development assignments. They demonstrated strong commercial awareness, "
+        "persuasive communication, dedication, professional conduct, teamwork, and an exceptional drive to learn."
     )
-    p4 = "We appreciate their commitment and wish them all the best for their future professional endeavors."
+    p4 = "We appreciate their commitment and valuable contribution to Aparaitech Software and wish them all the best for their future professional endeavors."
     _paragraph(c, p1, 140, 710, 885, EXPERIENCE_REF, EXPERIENCE_PAGE, SANS, 21, 36)
     _paragraph(c, p2, 140, 835, 885, EXPERIENCE_REF, EXPERIENCE_PAGE, SANS, 21, 36)
     _paragraph(c, p3, 140, 900, 885, EXPERIENCE_REF, EXPERIENCE_PAGE, SANS, 21, 36)
@@ -266,13 +266,12 @@ def build_software_dev_experience(data, base_dir):
     return out.getvalue()
 
 
-def build_software_dev_lor(data, base_dir):
+def build_bd_lor(data, base_dir):
     out = BytesIO()
     c = canvas.Canvas(out, pagesize=LOR_PAGE)
-    c.setTitle('Software Developer Internship Letter of Recommendation')
+    c.setTitle('Business Development Internship Letter of Recommendation')
     _draw_bg(c, base_dir, 'software_dev_lor_template_exact.png', LOR_PAGE)
 
-    # Replace the sample/placeholder content while keeping the supplied LOR artwork, border, logo, stamp and signature.
     _rect_from_top(c, 95, 280, 980, 885, LOR_REF, LOR_PAGE)
     _rect_from_top(c, 95, 1200, 355, 190, LOR_REF, LOR_PAGE)
 
@@ -284,22 +283,23 @@ def build_software_dev_lor(data, base_dir):
 
     p1 = (
         f"This letter is to formally recommend <b>{data['candidate_name']}</b>, who was associated with "
-        f"<b>Aparaitech Software</b> as a <b>{data['role']}</b> and contributed to real-time industry projects "
-        f"during an offline internship from <b>{_date_long_portable(data['start_date'])}</b> to "
-        f"<b>{_date_long_portable(data['end_date'])}</b>."
+        f"<b>Aparaitech Software</b> as a <b>{data['role']}</b> and contributed to business development and corporate "
+        f"outreach initiatives during an offline internship from <b>{_date_long_portable(data['start_date'])}</b> to "
+        f"<b>{_date_long_portable(data['end_date'])}</b> at our Baramati, Pune office."
     )
     p2 = (
-        "During this period, the candidate demonstrated strong technical competence, analytical ability, and a professional "
-        "approach toward software development. They participated in design, development, testing, debugging, and implementation "
-        "of software applications and consistently showed a sound understanding of modern development practices."
+        "During this period, the candidate demonstrated outstanding communication abilities, strategic acumen, and a proactive "
+        "approach toward lead identification, market research, and client relationship building. They consistently engaged with "
+        "prospective clients, supported outreach campaigns, and exhibited a sound understanding of modern corporate outreach strategies."
     )
     p3 = (
-        "In terms of work ethic, the candidate demonstrated dedication, responsibility, punctuality, and professionalism. "
-        "Ownership of assigned tasks, adherence to deadlines, teamwork, and commitment to quality were evident throughout the internship."
+        "In terms of work ethic, the candidate demonstrated dedication, responsibility, punctuality, and high integrity. "
+        "Ownership of assigned targets, adherence to deadlines, active teamwork, and a relentless commitment to organizational goals "
+        "were evident throughout their internship."
     )
     p4 = (
-        f"I strongly recommend <b>{data['candidate_name']}</b> and am confident that they will perform well in future academic "
-        "and professional endeavors."
+        f"I strongly recommend <b>{data['candidate_name']}</b> and am confident that they will excel in and bring great value "
+        "to future academic and professional endeavors."
     )
     _paragraph(c, p1, 115, 560, 940, LOR_REF, LOR_PAGE, SERIF, 21, 31)
     _paragraph(c, p2, 115, 700, 940, LOR_REF, LOR_PAGE, SERIF, 21, 31)
@@ -316,40 +316,32 @@ def build_software_dev_lor(data, base_dir):
     return out.getvalue()
 
 
-def build_software_developer_template_bundle(raw: Mapping, base_dir) -> Tuple[dict, SoftwareDevFiles]:
+def build_business_development_template_bundle(raw: Mapping, base_dir) -> Tuple[dict, BusinessDevFiles]:
     data = normalize_data(raw)
     safe = _safe(data['candidate_name'])
-    files: SoftwareDevFiles = {
-        'completion': (f'{safe}_Software_Developer_Completion_Certificate.pdf', build_software_dev_completion(data, base_dir)),
-        'experience': (f'{safe}_Software_Developer_Experience_Letter.pdf', build_software_dev_experience(data, base_dir)),
-        'lor': (f'{safe}_Software_Developer_Letter_of_Recommendation.pdf', build_software_dev_lor(data, base_dir)),
+    files: BusinessDevFiles = {
+        'completion': (f'{safe}_Business_Development_Completion_Certificate.pdf', build_bd_completion(data, base_dir)),
+        'experience': (f'{safe}_Business_Development_Experience_Letter.pdf', build_bd_experience(data, base_dir)),
+        'lor': (f'{safe}_Business_Development_Letter_of_Recommendation.pdf', build_bd_lor(data, base_dir)),
     }
     return data, files
 
 
-def send_software_developer_template_email(
-    to_email,
-    candidate_name,
-    files: SoftwareDevFiles,
-    smtp_config: Mapping
-):
-    host = smtp_config.get('host') or smtp_config.get('SMTP_HOST')
+def send_business_development_template_email(to_email, candidate_name, files: BusinessDevFiles, smtp_config: Mapping, data: Mapping | None = None):
+    host = smtp_config.get('host') or smtp_config.get('SMTP_HOST') or 'smtp.gmail.com'
     port = int(smtp_config.get('port') or smtp_config.get('SMTP_PORT') or 587)
-
     username = (
         smtp_config.get('username')
         or smtp_config.get('user')
         or smtp_config.get('SMTP_USERNAME')
         or smtp_config.get('SMTP_USER')
     )
-
     password = (
         smtp_config.get('password')
         or smtp_config.get('pass')
         or smtp_config.get('SMTP_PASSWORD')
         or smtp_config.get('SMTP_PASS')
     )
-
     sender = (
         smtp_config.get('sender')
         or smtp_config.get('from')
@@ -358,116 +350,112 @@ def send_software_developer_template_email(
         or username
     )
 
-    use_tls = smtp_config.get(
-        'use_tls',
-        smtp_config.get('SMTP_USE_TLS', True)
-    )
-
-    use_ssl = smtp_config.get(
-        'use_ssl',
-        smtp_config.get('SMTP_USE_SSL', False)
-    )
-
-    if isinstance(use_tls, str):
-        use_tls = use_tls.strip().lower() in ('1', 'true', 'yes', 'on')
-
-    if isinstance(use_ssl, str):
-        use_ssl = use_ssl.strip().lower() in ('1', 'true', 'yes', 'on')
-
-    if port == 465:
-        use_ssl = True
-        use_tls = False
-
-    if port == 587 and not use_ssl:
-        use_tls = True
-
     if not host or not sender:
         raise ValueError('SMTP configuration is incomplete.')
-
     if not username or not password:
-        raise ValueError('SMTP username/password is missing.')
+        raise ValueError('SMTP credentials (username/password) are missing.')
 
+    data = dict(data or {})
     first = candidate_name.split()[0] if candidate_name else 'Candidate'
+    start_date = _date_long_portable(data.get('start_date')) if data.get('start_date') else ''
+    end_date = _date_long_portable(data.get('end_date')) if data.get('end_date') else ''
+    credential_id = str(data.get('credential_id') or '').strip()
+    duration_line = f'Internship Duration: {start_date} to {end_date}' if start_date and end_date else ''
 
     msg = EmailMessage()
-
-    msg['Subject'] = (
-        f'Software Developer Internship Documents – '
-        f'{candidate_name} | Aparaitech Software'
-    )
-
+    msg['Subject'] = f'Congratulations on Successfully Completing Your Business Development Internship | Aparaitech Software'
     msg['From'] = sender
     msg['To'] = to_email
 
-    msg.set_content(
-        f"Dear {first},\n\n"
-        "Congratulations on completing your offline Software Developer Internship with Aparaitech Software.\n\n"
-        "Please find attached your Completion Certificate, Internship Experience Letter, and Letter of Recommendation.\n\n"
-        "Regards,\n"
-        "Team Aparaitech Software\n"
-        "Aparaitech Software Company\n"
-        "Baramati, Pune\n"
-        "Email: info@ai.aparaitech.org"
-    )
+    plain_lines = [
+        f'Dear {first},', '', 'Congratulations!', '',
+        'We are pleased to congratulate you on the successful completion of your Offline Business Development Internship with Aparaitech Software at our Baramati, Pune office.'
+    ]
+    if duration_line:
+        plain_lines.extend(['', duration_line])
+    plain_lines.extend([
+        '',
+        'During your internship, you demonstrated commitment, professionalism, market acumen, and dedication while contributing to assigned business development and outreach initiatives.',
+        '',
+        'As recognition of your successful internship completion, we have attached the following official documents:',
+        '1. Certificate of Completion',
+        '2. Internship Experience Letter',
+        '3. Letter of Recommendation',
+        '',
+        'Please keep these documents safely for your academic and professional records.'
+    ])
+    if credential_id:
+        plain_lines.extend(['', f'Credential ID: {credential_id}'])
+    plain_lines.extend([
+        '',
+        'We appreciate your contribution and wish you continued success in your future academic and professional journey.',
+        '', 'Best Regards,', 'Team Aparaitech Software', 'Aparaitech Software Company', 'Baramati, Pune', 'Email: info@ai.aparaitech.org'
+    ])
+    msg.set_content('\n'.join(plain_lines))
+
+    duration_html = f'<p style="margin:0 0 16px"><strong>Internship Duration:</strong> {start_date} to {end_date}</p>' if duration_line else ''
+    credential_html = f'<p style="margin:18px 0 0"><strong>Credential ID:</strong> {credential_id}</p>' if credential_id else ''
+    html = f'''<!doctype html>
+<html><body style="font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;margin:0;padding:24px;color:#1f2937">
+<div style="max-width:680px;margin:auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
+<div style="background:#176b3a;color:#fff;padding:22px 28px"><div style="font-size:21px;font-weight:700">Aparaitech Software</div><div style="font-size:13px;opacity:.9;margin-top:4px">Business Development Internship Completion</div></div>
+<div style="padding:30px 28px;line-height:1.65">
+<p>Dear <strong>{first}</strong>,</p>
+<h2 style="color:#176b3a;margin:6px 0 14px">Congratulations on successfully completing your internship!</h2>
+<p>We are pleased to congratulate you on the successful completion of your <strong>Offline Business Development Internship</strong> with <strong>Aparaitech Software</strong> at our <strong>Baramati, Pune</strong> office.</p>
+{duration_html}
+<p>During your internship, you demonstrated commitment, professionalism, client relationship skills, and dedication while contributing to key business development and outreach initiatives.</p>
+<p>As recognition of your successful internship completion, the following official documents are attached to this email:</p>
+<div style="background:#f0f9f4;border-left:4px solid #176b3a;padding:14px 18px;margin:16px 0"><div>Certificate of Completion</div><div>Internship Experience Letter</div><div>Letter of Recommendation</div></div>
+<p>Please keep these documents safely for your academic and professional records.</p>
+{credential_html}
+<p style="margin-top:22px">We appreciate your contribution and wish you continued success in your future academic and professional journey.</p>
+<p style="margin-bottom:0">Best Regards,<br><strong>Team Aparaitech Software</strong><br>Aparaitech Software Company<br>Baramati, Pune<br>Email: info@ai.aparaitech.org</p>
+</div></div></body></html>'''
+    msg.add_alternative(html, subtype='html')
 
     for _, (filename, payload) in files.items():
-        msg.add_attachment(
-            payload,
-            maintype='application',
-            subtype='pdf',
-            filename=filename
-        )
+        msg.add_attachment(payload, maintype='application', subtype='pdf', filename=filename)
 
+    # Resilient SMTP delivery: Try 587 STARTTLS, with automatic fallback to 465 SSL
     server = None
     sent = False
     last_err = None
 
+    # Try Primary
     try:
-        if use_ssl:
+        if port == 465:
             server = smtplib.SMTP_SSL(host, port, timeout=30)
         else:
             server = smtplib.SMTP(host, port, timeout=30)
             server.ehlo()
-            if use_tls:
-                server.starttls()
-                server.ehlo()
+            server.starttls()
+            server.ehlo()
         server.login(username, password)
         server.send_message(msg)
         sent = True
-    except smtplib.SMTPAuthenticationError as exc:
-        raise RuntimeError('SMTP authentication failed. Check SMTP_USER and SMTP_PASS/App Password.') from exc
     except (smtplib.SMTPServerDisconnected, TimeoutError, OSError) as exc:
         last_err = exc
     finally:
-        if server is not None:
-            try:
-                if getattr(server, 'sock', None) is not None:
-                    server.quit()
+        if server:
+            try: server.quit()
             except Exception:
-                try:
-                    server.close()
-                except Exception:
-                    pass
+                try: server.close()
+                except Exception: pass
             server = None
 
+    # Fallback to SSL port 465 if primary connection failed or disconnected
     if not sent:
         try:
             server = smtplib.SMTP_SSL(host, 465, timeout=30)
             server.login(username, password)
             server.send_message(msg)
             sent = True
-        except smtplib.SMTPAuthenticationError as exc:
-            raise RuntimeError('SMTP authentication failed. Check SMTP_USER and SMTP_PASS/App Password.') from exc
         except Exception as exc:
-            raise RuntimeError(f'SMTP server connection on port {port} failed, and fallback to port 465 failed: {exc}') from (last_err or exc)
+            raise RuntimeError(f"Email delivery failed (tried {port} and 465): {exc}") from (last_err or exc)
         finally:
-            if server is not None:
-                try:
-                    if getattr(server, 'sock', None) is not None:
-                        server.quit()
+            if server:
+                try: server.quit()
                 except Exception:
-                    try:
-                        server.close()
-                    except Exception:
-                        pass
-                server = None
+                    try: server.close()
+                    except Exception: pass

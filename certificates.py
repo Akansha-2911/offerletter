@@ -1229,6 +1229,7 @@ def send_certificate_bundle_email(
     smtp_config: Mapping,
     domain="Live Project"
 ):
+
     # --------------------------------------------------------
     # SMTP CONFIGURATION
     # --------------------------------------------------------
@@ -1240,106 +1241,195 @@ def send_certificate_bundle_email(
     )
 
     try:
+
         port = int(
             smtp_config.get('port')
             or smtp_config.get('SMTP_PORT')
             or 587
         )
-    except (TypeError, ValueError):
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
         port = 587
 
+
     username = (
+
         smtp_config.get('username')
-        or smtp_config.get('user')
-        or smtp_config.get('SMTP_USERNAME')
-        or smtp_config.get('SMTP_USER')
+
+        or smtp_config.get(
+            'user'
+        )
+
+        or smtp_config.get(
+            'SMTP_USERNAME'
+        )
+
+        or smtp_config.get(
+            'SMTP_USER'
+        )
     )
+
 
     password = (
+
         smtp_config.get('password')
-        or smtp_config.get('pass')
-        or smtp_config.get('SMTP_PASSWORD')
-        or smtp_config.get('SMTP_PASS')
+
+        or smtp_config.get(
+            'pass'
+        )
+
+        or smtp_config.get(
+            'SMTP_PASSWORD'
+        )
+
+        or smtp_config.get(
+            'SMTP_PASS'
+        )
     )
 
+
     sender = (
+
         smtp_config.get('sender')
-        or smtp_config.get('from')
-        or smtp_config.get('SMTP_SENDER')
-        or smtp_config.get('SMTP_FROM')
+
+        or smtp_config.get(
+            'from'
+        )
+
+        or smtp_config.get(
+            'SMTP_SENDER'
+        )
+
+        or smtp_config.get(
+            'SMTP_FROM'
+        )
+
         or username
     )
 
+
     # --------------------------------------------------------
-    # TLS / SSL
+    # TLS
     # --------------------------------------------------------
 
     use_tls = smtp_config.get(
         'use_tls',
-        smtp_config.get('SMTP_USE_TLS', True)
+        smtp_config.get(
+            'SMTP_USE_TLS',
+            True
+        )
     )
+
+
+    # --------------------------------------------------------
+    # SSL
+    # --------------------------------------------------------
 
     use_ssl = smtp_config.get(
         'use_ssl',
-        smtp_config.get('SMTP_USE_SSL', False)
+        smtp_config.get(
+            'SMTP_USE_SSL',
+            False
+        )
     )
 
-    if isinstance(use_tls, str):
-        use_tls = use_tls.strip().lower() in (
-            '1', 'true', 'yes', 'on'
+
+    # --------------------------------------------------------
+    # Convert string values
+    # --------------------------------------------------------
+
+    if isinstance(
+        use_tls,
+        str
+    ):
+
+        use_tls = (
+            use_tls
+            .strip()
+            .lower()
+            in (
+                '1',
+                'true',
+                'yes',
+                'on'
+            )
         )
 
-    if isinstance(use_ssl, str):
-        use_ssl = use_ssl.strip().lower() in (
-            '1', 'true', 'yes', 'on'
+
+    if isinstance(
+        use_ssl,
+        str
+    ):
+
+        use_ssl = (
+            use_ssl
+            .strip()
+            .lower()
+            in (
+                '1',
+                'true',
+                'yes',
+                'on'
+            )
         )
 
-    # Port 465 = SSL
+
+    # Port 465 normally uses SSL.
     if port == 465:
+
         use_ssl = True
         use_tls = False
 
-    # Port 587 = STARTTLS
-    elif port == 587 and not use_ssl:
+
+    # Port 587 normally uses STARTTLS.
+    if port == 587 and not use_ssl:
+
         use_tls = True
 
+
     # --------------------------------------------------------
-    # VALIDATE CONFIGURATION
+    # Validate configuration
     # --------------------------------------------------------
 
     if not host:
-        print("EMAIL WARNING: SMTP_HOST is missing.")
-        return {
-            'success': False,
-            'message': 'SMTP host is not configured.'
-        }
+
+        raise ValueError(
+            'SMTP_HOST is missing.'
+        )
+
 
     if not username:
-        print("EMAIL WARNING: SMTP username is missing.")
-        return {
-            'success': False,
-            'message': 'SMTP username is not configured.'
-        }
+
+        raise ValueError(
+            'SMTP_USER / SMTP_USERNAME is missing.'
+        )
+
 
     if not password:
-        print("EMAIL WARNING: SMTP password is missing.")
-        return {
-            'success': False,
-            'message': 'SMTP password is not configured.'
-        }
+
+        raise ValueError(
+            'SMTP_PASS / SMTP_PASSWORD is missing.'
+        )
+
 
     if not sender:
+
         sender = username
 
+
     if not to_email:
-        print("EMAIL WARNING: Recipient email address is missing.")
-        return {
-            'success': False,
-            'message': 'Recipient email address is required.'
-        }
+
+        raise ValueError(
+            'Recipient email address is required.'
+        )
+
 
     # --------------------------------------------------------
-    # BUILD EMAIL
+    # Build email
     # --------------------------------------------------------
 
     first_name = (
@@ -1348,16 +1438,24 @@ def send_certificate_bundle_email(
         else "Student"
     )
 
+
     msg = EmailMessage()
 
+
     msg['Subject'] = (
+
         f"Congratulations {candidate_name} – "
+
         f"Live Project Program Certificates | "
+
         f"Aparaitech Software"
     )
 
+
     msg['From'] = sender
+
     msg['To'] = to_email
+
 
     email_body = f"""Dear {first_name},
 
@@ -1393,261 +1491,92 @@ Team Aparaitech Software
 Aparaitech – Software & AI Company
 📍 Baramati, Pune
 📞 +91 9158852129
+✉️ info@ai.aparaitech.org
 🌐 www.aparaitech.org
 """
 
-    msg.set_content(email_body)
+
+    msg.set_content(
+        email_body
+    )
+
 
     # --------------------------------------------------------
-    # ATTACH ALL GENERATED PDFs
+    # Attach all generated PDFs
     # --------------------------------------------------------
 
-    for _, (filename, payload) in files.items():
+    for _, (
+        filename,
+        payload
+    ) in files.items():
+
         msg.add_attachment(
+
             payload,
+
             maintype='application',
+
             subtype='pdf',
+
             filename=filename
         )
-
     # --------------------------------------------------------
     # SEND EMAIL
     # --------------------------------------------------------
 
     server = None
-
     try:
-        print(
-            f"EMAIL: Connecting to SMTP server "
-            f"{host}:{port}..."
-        )
-
-        # IMPORTANT:
-        # Use a short timeout so Render does not block
-        # the Gunicorn worker for 30+ seconds.
-
-        if use_ssl:
-            server = smtplib.SMTP_SSL(
-                host,
-                port,
-                timeout=8
-            )
-        else:
-            server = smtplib.SMTP(
-                host,
-                port,
-                timeout=8
-            )
-
-            server.ehlo()
-
-            if use_tls:
-                server.starttls()
+        try:
+            if use_ssl:
+                server = smtplib.SMTP_SSL(host, port, timeout=30)
+            else:
+                server = smtplib.SMTP(host, port, timeout=30)
                 server.ehlo()
-
-        print("EMAIL: SMTP connection established.")
-
-        # ----------------------------------------------------
-        # LOGIN
-        # ----------------------------------------------------
-
-        server.login(
-            username,
-            password
-        )
-
-        print("EMAIL: SMTP authentication successful.")
-
-        # ----------------------------------------------------
-        # SEND
-        # ----------------------------------------------------
-
-        server.send_message(msg)
-
-        print(
-            f"EMAIL: Successfully sent certificate email "
-            f"to {to_email}"
-        )
-
-        return {
-            'success': True,
-            'message': (
-                f'Email sent successfully '
-                f'to {to_email}.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # AUTHENTICATION ERROR
-    # --------------------------------------------------------
-
+                if use_tls:
+                    server.starttls()
+                    server.ehlo()
+            server.login(username, password)
+            server.send_message(msg)
+            return {'success': True, 'message': f'Email sent successfully to {to_email}.'}
+        except (smtplib.SMTPServerDisconnected, TimeoutError, OSError):
+            if server is not None:
+                try:
+                    server.quit()
+                except Exception:
+                    try:
+                        server.close()
+                    except Exception:
+                        pass
+                server = None
+            server = smtplib.SMTP_SSL(host, 465, timeout=30)
+            server.login(username, password)
+            server.send_message(msg)
+            return {'success': True, 'message': f'Email sent successfully to {to_email}.'}
     except smtplib.SMTPAuthenticationError as exc:
-
-        print(
-            f"EMAIL WARNING: SMTP authentication failed: "
-            f"{exc}"
-        )
-
-        # IMPORTANT:
-        # Do NOT raise the error.
-        # Certificate generation should still succeed.
-
-        return {
-            'success': False,
-            'message': (
-                'Certificate generated successfully, '
-                'but email authentication failed.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # CONNECTION ERROR
-    # --------------------------------------------------------
-
+        raise RuntimeError(
+            'SMTP authentication failed. If you are using Gmail, use a Google App Password instead of your normal Gmail password. Original error: ' + str(exc)
+        ) from exc
     except smtplib.SMTPConnectError as exc:
-
-        print(
-            f"EMAIL WARNING: Unable to connect to "
-            f"{host}:{port}: {exc}"
-        )
-
-        return {
-            'success': False,
-            'message': (
-                'Certificate generated successfully, '
-                'but the email server could not be reached.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # SERVER DISCONNECTED
-    # --------------------------------------------------------
-
+        raise RuntimeError(f'Unable to connect to SMTP server {host}:{port}. Original error: {exc}') from exc
     except smtplib.SMTPServerDisconnected as exc:
-
-        print(
-            f"EMAIL WARNING: SMTP server disconnected: "
-            f"{exc}"
-        )
-
-        return {
-            'success': False,
-            'message': (
-                'Certificate generated successfully, '
-                'but the SMTP server disconnected.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # RECIPIENT REFUSED
-    # --------------------------------------------------------
-
+        raise RuntimeError(f'SMTP server disconnected unexpectedly while connecting to {host}:{port}. Original error: {exc}') from exc
     except smtplib.SMTPRecipientsRefused as exc:
-
-        print(
-            f"EMAIL WARNING: Recipient refused "
-            f"{to_email}: {exc}"
-        )
-
-        return {
-            'success': False,
-            'message': (
-                'Certificate generated successfully, '
-                'but the recipient email was rejected.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # SENDER REFUSED
-    # --------------------------------------------------------
-
+        raise RuntimeError(f'Recipient email was rejected by SMTP server: {to_email}. Original error: {exc}') from exc
     except smtplib.SMTPSenderRefused as exc:
-
-        print(
-            f"EMAIL WARNING: Sender refused "
-            f"{sender}: {exc}"
-        )
-
-        return {
-            'success': False,
-            'message': (
-                'Certificate generated successfully, '
-                'but the sender email was rejected.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # SMTP ERROR
-    # --------------------------------------------------------
-
+        raise RuntimeError(f'Sender email was rejected by SMTP server: {sender}. Original error: {exc}') from exc
     except smtplib.SMTPException as exc:
-
-        print(
-            f"EMAIL WARNING: SMTP error: {exc}"
-        )
-
-        return {
-            'success': False,
-            'message': (
-                'Certificate generated successfully, '
-                'but email sending failed.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # NETWORK / TIMEOUT ERROR
-    # --------------------------------------------------------
-
+        raise RuntimeError(f'SMTP email sending failed: {exc}') from exc
     except (TimeoutError, OSError) as exc:
-
-        print(
-            f"EMAIL WARNING: Network connection to "
-            f"{host}:{port} failed or timed out: {exc}"
-        )
-
-        return {
-            'success': False,
-            'message': (
-                'Certificate generated successfully, '
-                'but the email server could not be reached.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # UNKNOWN ERROR
-    # --------------------------------------------------------
-
+        raise RuntimeError(f'Network connection to SMTP server {host}:{port} failed. Original error: {exc}') from exc
     except Exception as exc:
-
-        print(
-            f"EMAIL WARNING: Unexpected email error: "
-            f"{exc}"
-        )
-
-        return {
-            'success': False,
-            'message': (
-                'Certificate generated successfully, '
-                'but email delivery failed.'
-            )
-        }
-
-    # --------------------------------------------------------
-    # SAFE CONNECTION CLEANUP
-    # --------------------------------------------------------
-
+        raise RuntimeError(f'Email sending failed: {exc}') from exc
     finally:
-
         if server is not None:
-
             try:
                 if getattr(server, 'sock', None) is not None:
                     server.quit()
-
             except Exception:
-
                 try:
                     server.close()
-
                 except Exception:
                     pass

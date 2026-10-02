@@ -51,7 +51,7 @@ def draw_page_live(c, doc, base_dir):
     c.drawRightString(W-30, H-50, "APARAITECH SOFTWARE COMPANY")
     c.setFont('Helvetica', 8)
     c.setFillColor(GREY)
-    c.drawRightString(W-30, H-64, "Live Project Program | Baramati, Pune – 412306")
+    c.drawRightString(W-30, H-64, "Live Project Program | Hinjewadi Phase 2, Pune - 411057")
 
     # Footer line
     c.setStrokeColor(CYAN)
@@ -60,7 +60,7 @@ def draw_page_live(c, doc, base_dir):
 
     c.setFont('Helvetica', 7)
     c.setFillColor(GREY)
-    c.drawCentredString(W/2, 42, "info@aparaitechsoftware.org | www.aparaitech.org | +91-9110406075")
+    c.drawCentredString(W/2, 42, "122, Gera Imperial Rise, Hinjewadi Phase 2, Wipro Circle, Pune - 411057 | info@ai.aparaitech.org | www.aparaitech.org")
     c.setFont('Helvetica', 8)
     c.drawRightString(W - 40, 25, f"Page {doc.page}")
     c.restoreState()
@@ -434,7 +434,7 @@ def build_live_project_pdf(data, admin_user="ADMIN"):
     E.append(SP(16))
     E.append(Paragraph(
         "<b> Revert Instructions:</b> After signing, please scan this page and email it to "
-        "<b>hr@aparaitechsoftware.org</b> with subject line: "
+        "<b>info@ai.aparaitech.org</b> with subject line: "
         f"<i>\"Offer Acceptance - {data.get('candidate_name', 'Candidate')} - Live Project\"</i>",
         ParagraphStyle('revert2', fontName='Helvetica', fontSize=9, textColor=GREY, leading=14)
     ))
@@ -526,7 +526,7 @@ Please find your offer letter attached to this email.
 2. Review all terms and conditions carefully
 3. Sign the "OFFER ACCEPTANCE" page (Page 2)
 4. Scan the signed acceptance page
-5. Email the scanned copy to: hr@aparaitechsoftware.org
+5. Email the scanned copy to: info@ai.aparaitech.org
 6. Subject line: "Offer Acceptance - {candidate_name} - Live Project"
 7. Complete within 3 business days
 
@@ -539,15 +539,15 @@ Program Highlights:
 • Performance-based stipend
 • Certificate upon successful completion
 
-If you have any questions, please contact us at hr@aparaitechsoftware.org or call +91-XXXXXXXXXX.
+If you have any questions, please contact us at info@ai.aparaitech.org or call +91-XXXXXXXXXX.
 
 We look forward to having you on board!
 
 Warm regards,
 HR Department
 Aparaitech Software Company
-Baramati, Pune – 412306
-info@aparaitechsoftware.org | www.aparaitech.org
+122, Gera Imperial Rise, Hinjewadi Phase 2, Wipro Circle, Pune - 411057
+info@ai.aparaitech.org | www.aparaitech.org
 """
     msg.attach(MIMEText(body, 'plain'))
 
@@ -557,8 +557,50 @@ info@aparaitechsoftware.org | www.aparaitech.org
     part.add_header('Content-Disposition', f'attachment; filename="{fname}"')
     msg.attach(part)
 
-    with smtplib.SMTP(smtp_config['host'], smtp_config['port']) as server:
+    host = smtp_config.get('host', 'smtp.gmail.com')
+    port = int(smtp_config.get('port', 587))
+    user = smtp_config.get('user', '')
+    pwd = smtp_config.get('pass', '')
+    sender = smtp_config.get('from', user)
+
+    server = None
+    sent = False
+    last_err = None
+    try:
+        server = smtplib.SMTP(host, port, timeout=30)
         server.ehlo()
         server.starttls()
-        server.login(smtp_config['user'], smtp_config['pass'])
-        server.sendmail(smtp_config['from'], to_email, msg.as_string())
+        server.ehlo()
+        server.login(user, pwd)
+        server.sendmail(sender, to_email, msg.as_string())
+        sent = True
+    except (smtplib.SMTPServerDisconnected, TimeoutError, OSError) as exc:
+        last_err = exc
+    finally:
+        if server:
+            try:
+                server.quit()
+            except Exception:
+                try:
+                    server.close()
+                except Exception:
+                    pass
+            server = None
+
+    if not sent:
+        try:
+            server = smtplib.SMTP_SSL(host, 465, timeout=30)
+            server.login(user, pwd)
+            server.sendmail(sender, to_email, msg.as_string())
+            sent = True
+        except Exception as exc:
+            raise RuntimeError(f"Email delivery failed (tried {port} and 465): {exc}") from (last_err or exc)
+        finally:
+            if server:
+                try:
+                    server.quit()
+                except Exception:
+                    try:
+                        server.close()
+                    except Exception:
+                        pass

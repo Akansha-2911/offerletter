@@ -10,12 +10,19 @@ body{background:#f4f7fb;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif
 .topbar{background:linear-gradient(135deg,#0d2b5e,#00aec7);padding:20px 28px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 8px 26px rgba(13,43,94,.18)}
 .brand{display:flex;align-items:center;gap:14px}.brand img{height:48px}.brand h1{font-size:20px}.brand p{font-size:12px;opacity:.8;margin-top:3px}
 .actions{display:flex;gap:9px;flex-wrap:wrap}.top-btn{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:9px 14px;border-radius:9px;font-size:12px;font-weight:700;background:rgba(255,255,255,.1)}
-.container{max-width:1380px;margin:0 auto;padding:26px}
+.container{max-width:1420px;margin:0 auto;padding:26px}
 .hero{background:#fff;border:1px solid #e5eaf2;border-radius:16px;padding:22px;box-shadow:0 10px 30px rgba(34,55,91,.06);display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.hero h2{font-size:20px;color:#0d2b5e}.hero p{font-size:12px;color:#73809a;margin-top:5px}.storage{background:#e9fbf7;color:#18715e;border:1px solid #bcebdd;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:700}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{background:#fff;border:1px solid #e4e9f1;border-radius:13px;padding:16px}.stat .n{font-size:24px;font-weight:800;color:#0d2b5e}.stat .t{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#7b879b;margin-top:3px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tab{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #dce3ee;color:#40506d;padding:9px 13px;border-radius:9px;text-decoration:none;font-size:12px;font-weight:700}.tab.active{background:#0d2b5e;color:#fff;border-color:#0d2b5e}.count{background:rgba(0,174,199,.12);color:#00869a;border-radius:999px;padding:2px 7px}.tab.active .count{background:rgba(255,255,255,.18);color:#fff}
 .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.toolbar h3{font-size:15px;color:#0d2b5e}.export{background:#0b9d72;color:#fff;text-decoration:none;padding:10px 14px;border-radius:9px;font-size:12px;font-weight:800;box-shadow:0 5px 15px rgba(11,157,114,.18)}
-.table-wrap{background:#fff;border:1px solid #e3e9f2;border-radius:14px;overflow:auto;box-shadow:0 10px 30px rgba(34,55,91,.05)}table{width:100%;border-collapse:collapse;min-width:1050px}th{background:#f7f9fc;color:#40506d;text-align:left;padding:12px 13px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #dfe5ef;position:sticky;top:0}td{padding:12px 13px;border-bottom:1px solid #edf1f6;font-size:12px;vertical-align:top}tr:hover td{background:#fbfdff}.name{font-weight:700;color:#0d2b5e}.muted{color:#77839a}.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800}.sent{background:#e7f8f0;color:#17744f}.failed{background:#fdecea;color:#b53a31}.skipped{background:#f0f2f6;color:#647087}.type{background:#eaf1ff;color:#315f9d}.error-text{max-width:270px;white-space:normal;color:#a7443b}.empty{text-align:center;padding:44px 20px;color:#8490a3}.details{font-size:11px;line-height:1.55}.details b{color:#4a5870;font-weight:700}
+.table-wrap{background:#fff;border:1px solid #e3e9f2;border-radius:14px;overflow:auto;box-shadow:0 10px 30px rgba(34,55,91,.05)}table{width:100%;border-collapse:collapse;min-width:1120px}th{background:#f7f9fc;color:#40506d;text-align:left;padding:12px 13px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #dfe5ef;position:sticky;top:0}td{padding:12px 13px;border-bottom:1px solid #edf1f6;font-size:12px;vertical-align:top}tr:hover td{background:#fbfdff}.name{font-weight:700;color:#0d2b5e}.muted{color:#77839a}.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800}.sent{background:#e7f8f0;color:#17744f}.failed{background:#fdecea;color:#b53a31}.skipped{background:#f0f2f6;color:#647087}.type{background:#eaf1ff;color:#315f9d}.error-text{max-width:270px;white-space:normal;color:#a7443b}.empty{text-align:center;padding:44px 20px;color:#8490a3}.details{font-size:11px;line-height:1.55}.details b{color:#4a5870;font-weight:700}
+.btn-del{background:#fff1f0;color:#cf1322;border:1px solid #ffa39e;padding:6px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all .2s;white-space:nowrap}
+.btn-del:hover{background:#ff4d4f;color:#fff;border-color:#ff4d4f;transform:translateY(-1px);box-shadow:0 3px 8px rgba(255,77,79,.25)}
+.btn-del:disabled{opacity:.5;cursor:not-allowed;transform:none}
+tr.deleting{opacity:.25;transition:opacity .25s ease}
+.toast{position:fixed;bottom:24px;right:24px;background:#17233d;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.22);display:none;z-index:9999}
+.toast.success{background:#0b9d72}
+.toast.error{background:#cf1322}
 @media(max-width:850px){.topbar,.hero{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:repeat(2,1fr)}.container{padding:16px}}
 </style>
 </head>
@@ -26,14 +33,14 @@ body{background:#f4f7fb;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif
 </div>
 <div class="container">
   <div class="hero">
-    <div><h2>Generated Documents & Email Records</h2><p>Every generated offer letter/certificate is automatically recorded here, even if email delivery fails.</p></div>
+    <div><h2>Generated Documents & Email Records</h2><p>Every generated offer letter/certificate is automatically recorded here, even if email delivery fails. Test and mistaken records can be deleted.</p></div>
     <div class="storage">● Storage: {{ storage_backend }}</div>
   </div>
   <div class="stats">
     <div class="stat"><div class="n">{{ counts.total }}</div><div class="t">Total Generated</div></div>
     <div class="stat"><div class="n">{{ counts.sent }}</div><div class="t">Emails Sent</div></div>
     <div class="stat"><div class="n">{{ counts.failed }}</div><div class="t">Email Failed</div></div>
-    <div class="stat"><div class="n">{{ records|length }}</div><div class="t">Current Section Rows</div></div>
+    <div class="stat"><div class="n" id="stat-current">{{ records|length }}</div><div class="t">Current Section Rows</div></div>
   </div>
   <div class="tabs">
     <a class="tab {{ 'active' if active_type == 'all' else '' }}" href="/admin/data?type=all">All Data <span class="count">{{ counts.total }}</span></a>
@@ -47,11 +54,11 @@ body{background:#f4f7fb;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif
   </div>
   <div class="table-wrap">
     {% if records %}
-    <table>
-      <thead><tr><th>Date & Time</th><th>Name</th><th>Email</th><th>Document Type</th><th>Email Status</th><th>Generated By</th><th>File</th><th>Submitted Data</th><th>Email Error</th></tr></thead>
+    <table id="records-table">
+      <thead><tr><th>Date & Time</th><th>Name</th><th>Email</th><th>Document Type</th><th>Email Status</th><th>Generated By</th><th>File</th><th>Submitted Data</th><th>Email Error</th><th style="text-align:center">Action</th></tr></thead>
       <tbody>
       {% for row in records %}
-      <tr>
+      <tr id="row-{{ row.record_id }}">
         <td class="muted">{{ row.created_at|replace('T',' ') }}</td>
         <td class="name">{{ row.name or '-' }}</td>
         <td>{{ row.email or '-' }}</td>
@@ -61,6 +68,12 @@ body{background:#f4f7fb;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif
         <td class="muted">{{ row.filename }}</td>
         <td class="details">{% for k,v in (row.data or {}).items() %}{% if k not in ['email','employee_name','candidate_name','name'] and v %}<b>{{ k|replace('_',' ')|title }}:</b> {{ v }}<br>{% endif %}{% endfor %}</td>
         <td class="error-text">{{ row.email_error or '-' }}</td>
+        <td style="text-align:center">
+          <form method="POST" action="/admin/data/delete/{{ row.record_id }}" onsubmit="return handleDelete(event, '{{ row.record_id }}', '{{ row.name|replace('\'', '\\\'') if row.name else '' }}')">
+            <input type="hidden" name="type" value="{{ active_type }}">
+            <button type="submit" class="btn-del" title="Delete this record">🗑 Delete</button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
       </tbody>
@@ -70,5 +83,81 @@ body{background:#f4f7fb;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif
     {% endif %}
   </div>
 </div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.className = 'toast ' + (type || 'success');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(window._toastTimeout);
+  window._toastTimeout = setTimeout(function() {
+    t.style.display = 'none';
+  }, 3200);
+}
+
+async function handleDelete(event, recordId, name) {
+  var label = name ? ('record for "' + name + '"') : 'this document record';
+  if (!confirm('Are you sure you want to delete ' + label + '? This cannot be undone.')) {
+    event.preventDefault();
+    return false;
+  }
+
+  if (window.fetch) {
+    event.preventDefault();
+    var form = event.target;
+    var btn = form.querySelector('button');
+    var row = document.getElementById('row-' + recordId);
+    if (btn) btn.disabled = true;
+    if (row) row.classList.add('deleting');
+
+    try {
+      var resp = await fetch('/admin/data/delete/' + encodeURIComponent(recordId), {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      var data = await resp.json();
+      if (data && data.ok) {
+        if (row) {
+          row.style.transition = 'all 0.25s ease';
+          row.style.opacity = '0';
+          row.style.transform = 'scale(0.97)';
+          setTimeout(function() {
+            row.remove();
+            var countEl = document.getElementById('stat-current');
+            if (countEl) {
+              var cur = parseInt(countEl.textContent, 10);
+              if (!isNaN(cur) && cur > 0) countEl.textContent = cur - 1;
+            }
+            var tbody = document.querySelector('#records-table tbody');
+            if (tbody && tbody.children.length === 0) {
+              var wrap = document.querySelector('.table-wrap');
+              if (wrap) wrap.innerHTML = '<div class="empty">No generated records are available in this section yet.</div>';
+            }
+          }, 250);
+        }
+        showToast('Record deleted successfully.', 'success');
+        return false;
+      } else {
+        if (btn) btn.disabled = false;
+        if (row) row.classList.remove('deleting');
+        showToast('Failed to delete record.', 'error');
+        return false;
+      }
+    } catch (err) {
+      if (btn) btn.disabled = false;
+      if (row) row.classList.remove('deleting');
+      form.submit();
+      return true;
+    }
+  }
+  return true;
+}
+</script>
 </body>
 </html>

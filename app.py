@@ -26,9 +26,10 @@ from reportlab.pdfgen import canvas as rl_canvas
 from reportlab.lib.utils import ImageReader
 from certificates import build_certificate_bundle, send_certificate_bundle_email
 from softwaredeveloper_templates import build_software_developer_template_bundle, send_software_developer_template_email
+from businessdevelopment_templates import build_business_development_template_bundle, send_business_development_template_email
 from bda_offer import build_bda_pdf
-from data_store import (DOCUMENT_TYPES, dashboard_counts, list_document_logs,
-                        save_document_log, storage_backend)
+from data_store import (DOCUMENT_TYPES, dashboard_counts, delete_document_log,
+                        list_document_logs, save_document_log, storage_backend)
 
 load_dotenv(override=True)
 
@@ -69,6 +70,19 @@ GREY = colors.HexColor('#555555')
 
 def gp(f): return os.path.join(BASE_DIR, "static", f)
 
+def resolve_stamp_path():
+    """Use the new Pune stamp first and fall back to older names if needed."""
+    stamp_candidates = [
+        gp("stamp1.png"),
+        gp("aparaitech_pune_stamp.png"),
+        gp("new_stamp.png"),
+        gp("stamp.png"),
+    ]
+    for path in stamp_candidates:
+        if os.path.exists(path):
+            return path
+    return ""
+
 def draw_page(c, doc):
     c.saveState()
     c.setFillColorRGB(1, 1, 1)
@@ -89,7 +103,7 @@ def draw_page(c, doc):
     c.line(40, 52, W-40, 52)
     c.setFont('Helvetica', 7.5)
     c.setFillColor(GREY)
-    c.drawCentredString(W/2, 38, "Baramati, Pune – 412306, Maharashtra  |  info@aparaitechsoftware.org  |  www.aparaitech.org")
+    c.drawCentredString(W/2, 38, "122, Gera Imperial Rise, Hinjewadi Phase 2, Wipro Circle, Pune - 411057  |  info@ai.aparaitech.org  |  www.aparaitech.org")
     c.setFont('Helvetica', 8)
     c.drawRightString(W - 40, 20, f"Page {doc.page}")
     c.restoreState()
@@ -186,7 +200,7 @@ def build_pdf(data, admin_user="ADMIN"):
     ], colWidths=[255, 255], hAlign='LEFT')
     top_tbl.setStyle(TableStyle([('LEFTPADDING', (0,0), (0,0), 0), ('RIGHTPADDING', (-1,-1), (-1,-1), 0)]))
     E.append(top_tbl); E.append(SP(8))
-    E.append(Paragraph("OFFER OF EMPLOYMENT &amp; APPOINTMENT LETTER", title)); E.append(SP(4))
+    E.append(Paragraph("OFFER OF EMPLOYMENT / INTERNSHIP &amp; APPOINTMENT LETTER", title)); E.append(SP(4))
     emp_name = data.get('employee_name', 'Employee')
     E.append(Paragraph("To,", body))
     E.append(Paragraph(f"<b>Mr./Ms. {emp_name}</b>", bold))
@@ -197,15 +211,15 @@ def build_pdf(data, admin_user="ADMIN"):
         E.append(Paragraph(f"<b>Email:</b> {data.get('email')}", body))
     E.append(SP(6))
     position = data.get('position', 'Developer')
-    E.append(Paragraph(f"<b>Subject: Offer of Employment for the position of {position}</b>", body)); E.append(SP(6))
+    E.append(Paragraph(f"<b>Subject: Offer of Employment / Internship &amp; Appointment for the position of {position}</b>", body)); E.append(SP(6))
     E.append(Paragraph(f"Dear {emp_name},", body))
     E.append(Paragraph(f"We are pleased to confirm your selection for the position of <b>{position}</b> at <b>APARAITECH SOFTWARE COMPANY</b>.", body))
-    E.append(Paragraph("This letter outlines the terms and conditions of your employment with us. We are confident that your skills and experience will be a valuable addition to our team.", body)); E.append(SP(6))
+    E.append(Paragraph("This letter outlines the terms and conditions of your employment / internship with us. We are confident that your skills and experience will be a valuable addition to our team.", body)); E.append(SP(6))
     
     # ── CORRECTED: Use append() instead of extend() ──────────
-    E.append(sec("1", "Position &amp; Appointment", f"You are hereby appointed as <b>{position}</b> and shall report to the designated reporting manager at our Baramati office. Your services may be transferred to any department, project, or location as per business requirements."))
+    E.append(sec("1", "Position &amp; Appointment", f"You are hereby appointed as <b>{position}</b> and shall report to the designated reporting manager at our Hinjewadi Phase 2, Pune - 411057 office. Your services may be transferred to any department, project, or location as per business requirements."))
     
-    E.append(sec("2", "INTERNSHIP / TRAINING PERIOD", f"&#x2022; &nbsp;<b>Internship Duration:</b> {duration_str}<br/>&#x2022; &nbsp;<b>Internship Start Date:</b> {joining}<br/>&#x2022; &nbsp;<b>Internship End Date:</b> {end_date}<br/>You are required to report at our Baramati office on the training start date along with all original documents for verification."))
+    E.append(sec("2", "INTERNSHIP / TRAINING PERIOD", f"&#x2022; &nbsp;<b>Internship Duration:</b> {duration_str}<br/>&#x2022; &nbsp;<b>Internship Start Date:</b> {joining}<br/>&#x2022; &nbsp;<b>Internship End Date:</b> {end_date}<br/>You are required to report at our Hinjewadi Phase 2, Pune - 411057 office on the training start date along with all original documents for verification."))
     
     E.append(sec("3", "Probation Period", "You will be on probation/internship for a period of Four (4) months from the date of joining. During this period, your performance will be evaluated, and upon successful completion, you will be confirmed as a regular employee based on your performance and as per company requirements. The company reserves the right to extend the probation period if deemed necessary."))
     
@@ -214,7 +228,7 @@ def build_pdf(data, admin_user="ADMIN"):
     
     E.append(sec("5", "Pre-Placement Offer (PPO) &amp; Full-Time Employment", "After successful completion of the Internship period, candidates may be considered for a PPO based on performance, project requirements, academic completion, and position availability. The offered package, if applicable, may range between 2.5 LPA to 4.5 LPA depending on the final evaluation. APARAITECH reserves the right to extend or decline the PPO at its sole discretion. Completion of the internship does not guarantee full-time employment. "))
     
-    E.append(sec("6", "Working Hours &amp; Attendance", "The company follows a 6-day work week (9 hours/day), Monday through Saturday, 10:00 AM to 7:30 PM. You may be required to work additional hours during critical project phases. Regular and punctual attendance is essential."))
+    E.append(sec("6", "Working Hours &amp; Attendance", "The company follows a 5-day work week. Your working hours and shift timing will be assigned by the company after joining, based on the applicable department, project, and business requirements. You are expected to follow the assigned shift schedule, maintain regular and punctual attendance, and may be required to work additional hours during critical project phases when reasonably required."))
     
     E.append(sec("7", "Leave Entitlement", "As this is a training and internship program, interns are expected to maintain regular attendance throughout the internship period. Any leave must be approved in advance by the reporting manager. Excessive absenteeism or unauthorized leave may adversely affect the intern's performance evaluation and eligibility for receiving an Internship Completion Certificate, Experience Letter, and project documentation.If taking a leaves it may extend your internship"))
     
@@ -242,37 +256,50 @@ def build_pdf(data, admin_user="ADMIN"):
     # ─────────────────────────────────────────────────────────
     
     E.append(Paragraph("We are delighted to welcome you to the APARAITECH SOFTWARE COMPANY family. Please sign and return the duplicate copy of this letter as your acceptance of the terms and conditions mentioned here in.", body))
-    E.append(Paragraph("We look forward to a long and mutually rewarding association.", body)); E.append(SP(12))
-    E.append(Paragraph("<b>For APARAITECH SOFTWARE COMPANY</b>", bold)); E.append(SP(6))
+    E.append(Paragraph("We look forward to a long and mutually rewarding association.", body)); E.append(SP(8))
 
-    sp, st = gp("signature.png"), gp("stamp.png")
+    # Force company signature and stamp onto Page 2.
+    # Keep the company signature and employee acceptance section compact
+    # so it can adjust on Page 2 without creating an extra page.
+    E.append(SP(4))
+    E.append(Paragraph("<b>For APARAITECH SOFTWARE COMPANY</b>", bold)); E.append(SP(3))
+
+    sp, st = gp("signature.png"), resolve_stamp_path()
     from reportlab.platypus import Flowable
     class SignatureBlock(Flowable):
         def __init__(self, sig_path, stamp_path):
             Flowable.__init__(self)
-            self.sig_path = sig_path; self.stamp_path = stamp_path
-            self.width = 4*inch; self.height = 1.6*inch
+            self.sig_path = sig_path
+            self.stamp_path = stamp_path
+            self.width = 3.2*inch
+            self.height = 1.05*inch
         def draw(self):
             c = self.canv
             if os.path.exists(self.sig_path):
-                c.drawImage(self.sig_path, 0, 0.95*inch, width=1.5*inch, height=0.6*inch, preserveAspectRatio=True, mask='auto')
+                c.drawImage(self.sig_path, 0, 0.56*inch, width=1.15*inch, height=0.42*inch, preserveAspectRatio=True, mask='auto')
             from reportlab.lib.styles import ParagraphStyle
             from reportlab.lib.enums import TA_LEFT
             from reportlab.platypus import Paragraph
             import datetime as dt
             now = dt.datetime.now().strftime('%d-%m-%Y %H:%M')
-            style = ParagraphStyle('d', fontName='Courier', fontSize=8, textColor=colors.HexColor('#555555'), leading=12, alignment=TA_LEFT)
+            style = ParagraphStyle('d', fontName='Courier', fontSize=7, textColor=colors.HexColor('#555555'), leading=9, alignment=TA_LEFT)
             lines = ["Digitally Signed by", f"Date: {now}", "<b>Managing Director</b>"]
-            y = 0.6 * inch
+            text_x = 0
+            y = 0.32 * inch
             for line in lines:
-                p = Paragraph(line, style); pw, ph = p.wrap(2.5*inch, 20); p.drawOn(c, 0, y); y -= ph + 1
+                p = Paragraph(line, style)
+                pw, ph = p.wrap(1.45*inch, 20)
+                p.drawOn(c, text_x, y)
+                y -= ph + 1
             if os.path.exists(self.stamp_path):
-                c.drawImage(self.stamp_path, 0.8*inch, -0.05*inch, width=1.0*inch, height=1.0*inch, preserveAspectRatio=True, mask='auto')
+                c.drawImage(self.stamp_path, 1.5*inch, 0.02*inch, width=0.72*inch, height=0.72*inch, preserveAspectRatio=True, mask='auto')
     E.append(SignatureBlock(sig_path=sp if os.path.exists(sp) else "", stamp_path=st if os.path.exists(st) else ""))
+
+    # Acceptance section must start on a separate third page.
     E.append(PageBreak())
-    E.append(SP(20)); E.append(Paragraph("ACCEPTANCE BY EMPLOYEE", title)); E.append(SP(10))
-    E.append(Paragraph("I have read and understood the terms and conditions of employment as stated above. I hereby accept this offer and agree to abide by the company's policies and regulations.", body)); E.append(SP(40))
-    sig_accept_tbl = Table([ [Paragraph("<b>Signature of Employee</b>", body), Paragraph("<b>Date</b>", rgt)] ], colWidths=[200, 200], hAlign='LEFT')
+    E.append(SP(20)); E.append(Paragraph("ACCEPTANCE BY EMPLOYEE / INTERN", title)); E.append(SP(10))
+    E.append(Paragraph("I have read and understood the terms and conditions of employment / internship as stated above. I hereby accept this offer and agree to abide by the company's policies and regulations.", body)); E.append(SP(40))
+    sig_accept_tbl = Table([ [Paragraph("<b>Signature of Employee / Intern</b>", body), Paragraph("<b>Date</b>", rgt)] ], colWidths=[200, 200], hAlign='LEFT')
     sig_accept_tbl.setStyle(TableStyle([('LEFTPADDING', (0,0), (0,0), 0), ('RIGHTPADDING', (-1,-1), (-1,-1), 0)]))
     E.append(sig_accept_tbl)
 
@@ -384,7 +411,7 @@ Warm regards,
 
 HR Department
 Aparaitech Software Company
-Baramati, Pune – 413102
+122, Gera Imperial Rise, Hinjewadi Phase 2, Wipro Circle, Pune - 411057
 info@ai.aparaitech.org
 www.aparaitech.org
 """
@@ -400,7 +427,13 @@ www.aparaitech.org
     )
     msg.attach(part)
 
+    _send_mail_resilient(msg, to_email)
+
+
+def _send_mail_resilient(msg, to_email):
     server = None
+    sent = False
+    last_err = None
     try:
         if SMTP_USE_SSL or SMTP_PORT == 465:
             server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=30)
@@ -412,6 +445,11 @@ www.aparaitech.org
                 server.ehlo()
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(SMTP_FROM, to_email, msg.as_string())
+        sent = True
+    except smtplib.SMTPAuthenticationError:
+        raise
+    except (smtplib.SMTPServerDisconnected, TimeoutError, OSError) as exc:
+        last_err = exc
     finally:
         if server is not None:
             try:
@@ -422,6 +460,28 @@ www.aparaitech.org
                     server.close()
                 except Exception:
                     pass
+            server = None
+
+    if not sent:
+        try:
+            server = smtplib.SMTP_SSL(SMTP_HOST, 465, timeout=30)
+            server.login(SMTP_USER, SMTP_PASS)
+            server.sendmail(SMTP_FROM, to_email, msg.as_string())
+            sent = True
+        except Exception as exc:
+            raise RuntimeError(f"Email delivery failed (tried {SMTP_PORT} and 465): {exc}") from (last_err or exc)
+        finally:
+            if server is not None:
+                try:
+                    if getattr(server, "sock", None) is not None:
+                        server.quit()
+                except Exception:
+                    try:
+                        server.close()
+                    except Exception:
+                        pass
+
+
 def send_bda_offer_email(to_email, candidate_name, pdf_buf, fname):
     msg = MIMEMultipart()
     msg['From'] = SMTP_FROM
@@ -447,7 +507,7 @@ We look forward to your contribution to the growth of Aparaitech Software.
 Warm regards,
 HR Department
 Aparaitech Software Company
-Hinjewadi, Pune - 411057
+122, Gera Imperial Rise, Hinjewadi Phase 2, Wipro Circle, Pune - 411057
 info@ai.aparaitech.org | www.aparaitech.org
 """
 
@@ -460,28 +520,7 @@ info@ai.aparaitech.org | www.aparaitech.org
     part.add_header('Content-Disposition', f'attachment; filename="{fname}"')
     msg.attach(part)
 
-    server = None
-    try:
-        if SMTP_USE_SSL or SMTP_PORT == 465:
-            server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=30)
-        else:
-            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30)
-            server.ehlo()
-            if SMTP_USE_TLS:
-                server.starttls()
-                server.ehlo()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.sendmail(SMTP_FROM, to_email, msg.as_string())
-    finally:
-        if server is not None:
-            try:
-                if getattr(server, "sock", None) is not None:
-                    server.quit()
-            except Exception:
-                try:
-                    server.close()
-                except Exception:
-                    pass
+    _send_mail_resilient(msg, to_email)
 
 
 
@@ -654,6 +693,16 @@ def export_admin_data():
         workbook, as_attachment=True, download_name=filename,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+
+@app.route("/admin/data/delete/<record_id>", methods=["POST"])
+@login_required
+def delete_admin_data(record_id):
+    ok = delete_document_log(record_id)
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.is_json:
+        return jsonify({"ok": ok, "record_id": record_id})
+    return_type = request.form.get("type") or request.args.get("type") or "all"
+    return redirect(url_for("admin_data", type=return_type))
 
 
 @app.route("/employment")
@@ -832,6 +881,54 @@ def generate_software_developer_templates():
     response.headers["X-Credential-ID"] = data["credential_id"]
     response.headers["X-Filename"] = filename
     response.headers["Access-Control-Expose-Headers"] = "X-Email-Status, X-Email-Error, X-Credential-ID, X-Filename"
+    return response
+
+
+@app.route("/business-development-templates")
+@login_required
+def business_development_templates_form():
+    return render_template("businessdevelopment_templates.html", admin_user=session.get("admin_user", "ADMIN"))
+
+
+@app.route("/generate-business-development-templates", methods=["POST"])
+@login_required
+def generate_business_development_templates():
+    try:
+        data, files = build_business_development_template_bundle(request.form, BASE_DIR)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+    email_status = "skipped"
+    email_error = ""
+    if data.get("email"):
+        try:
+            send_business_development_template_email(
+                data["email"], data["candidate_name"], files, smtp_config(), data=data
+            )
+            email_status = "sent"
+        except Exception as exc:
+            email_status = "failed"
+            email_error = re.sub(r"[\r\n]+", " ", str(exc))[:500]
+
+    bundle = certificate_zip(files)
+    safe_name = re.sub(r"[^A-Za-z0-9_-]+", "_", data["candidate_name"]).strip("_") or "Candidate"
+    filename = f"{safe_name}_Business_Development_Internship_Documents.zip"
+    log_generated_document(
+        "business_development",
+        data,
+        email_status=email_status,
+        email_error=email_error,
+        filename=filename,
+        extra={"credential_id": data.get("credential_id", "")},
+    )
+    response = send_file(bundle, as_attachment=True, download_name=filename, mimetype="application/zip")
+    response.headers["X-Email-Status"] = email_status
+    response.headers["X-Email-Error"] = email_error
+    response.headers["X-Credential-ID"] = data["credential_id"]
+    response.headers["X-Filename"] = filename
+    response.headers["Access-Control-Expose-Headers"] = (
+        "X-Email-Status, X-Email-Error, X-Credential-ID, X-Filename"
+    )
     return response
 
 

@@ -1,5 +1,10 @@
 __pycache__/
 *.pyc
-*.env
+.env
 .env.*
 !.env.example
+*.pdf
+*.zip
+.DS_Store
+.vscode/
+.idea/

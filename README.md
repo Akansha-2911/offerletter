@@ -69,25 +69,3 @@ The included `vercel.json` supports Vercel deployment. Add all values from `.env
 ```bash
 gunicorn app:app
 ```
-
-## Admin data storage and Excel export
-
-The admin portal now automatically logs every generated Employment Offer, BDA Offer, Live Project Offer, Certificate Bundle, and Software Developer document bundle.
-
-Recommended production storage is MongoDB. Add these values to `.env`:
-
-```env
-MONGO_URI=mongodb+srv://YOUR_USER:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/?retryWrites=true&w=majority
-MONGO_DB_NAME=aparaitech_document_portal
-```
-
-If `MONGO_URI` is not configured or MongoDB is temporarily unavailable, the app safely falls back to `data/document_logs.json` so document generation is not blocked.
-
-Admin data pages:
-- `/admin/data` — view all sections and records
-- `/admin/data?type=employment_offer`
-- `/admin/data?type=bda_offer`
-- `/admin/data?type=live_project_offer`
-- `/admin/data?type=certificates`
-- `/admin/data?type=software_developer`
-- `/admin/data/export?type=all` — download an Excel workbook with separate sheets per document type

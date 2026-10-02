@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Development Internship Certificates - Aparaitech</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;background:linear-gradient(135deg,#0d2b5e,#176b3a 55%,#00a86b);font-family:'Segoe UI',Arial,sans-serif;padding:28px 18px;color:#1f2937}.card{max-width:900px;margin:auto;background:#fff;border-radius:18px;box-shadow:0 24px 75px rgba(0,0,0,.28);overflow:hidden}.header{position:relative;padding:32px;text-align:center;background:linear-gradient(135deg,#0d2b5e,#176b3a);color:#fff}.header img{height:60px;margin-bottom:9px}.header h1{font-size:24px}.header p{font-size:13px;opacity:.86;margin-top:5px}.admin,.logout{position:absolute;top:18px;padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.14);color:#fff;font-size:11px}.admin{left:18px}.logout{right:18px;text-decoration:none}.body{padding:30px 36px}.back{display:inline-block;margin-bottom:18px;color:#176b3a;font-weight:700;font-size:13px;text-decoration:none}.templates{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}.template{border:1px solid #dbe7f4;background:#f5faf7;border-radius:12px;padding:14px;text-align:center}.template b{display:block;color:#176b3a;font-size:13px;margin-bottom:4px}.template span{font-size:11px;color:#68758a}.info{background:#eefbf3;border:1px solid #c3edd3;color:#116839;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;margin-bottom:22px}.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{margin-bottom:17px}label{display:block;font-size:11px;font-weight:800;color:#0b2f63;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}input{width:100%;padding:11px 13px;border:1.5px solid #dce3ee;border-radius:8px;font-size:14px;outline:none}input:focus{border-color:#00a86b;box-shadow:0 0 0 3px rgba(0,168,107,.12)}.btn{width:100%;padding:14px;border:0;border-radius:9px;background:linear-gradient(135deg,#176b3a,#0d2b5e);color:#fff;font-size:16px;font-weight:800;cursor:pointer;margin-top:4px;transition:.2s}.btn:hover{opacity:.9;transform:translateY(-1px)}.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}.note{text-align:center;color:#7a8598;font-size:12px;margin-top:10px}.msg{display:none;margin-top:16px;padding:12px 14px;border-radius:9px;font-size:13px;text-align:center}.success{background:#eaf9f1;color:#187344;border:1px solid #a8dfc1}.warning{background:#fff6e9;color:#9a5300;border:1px solid #f4d39e}.error{background:#fdeeed;color:#b42318;border:1px solid #f0b9b5}@media(max-width:700px){.row,.templates{grid-template-columns:1fr}.header{padding-top:62px}.body{padding:24px 20px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <span class="admin">{{ admin_user }}</span><a href="/logout" class="logout">Logout</a>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Aparaitech">
+    <h1>Business Development Internship Certificates</h1>
+    <p>Completion Certificate + Experience Letter + LOR · Baramati, Pune</p>
+  </div>
+  <div class="body">
+    <a class="back" href="/">← Back to Dashboard</a>
+    <div class="templates">
+      <div class="template"><b>🏆 Completion Certificate</b><span>Gold landscape certificate · Baramati, Pune</span></div>
+      <div class="template"><b>📄 Experience Letter</b><span>Official Business Development experience letter</span></div>
+      <div class="template"><b>⭐ Recommendation Letter</b><span>Official LOR with Baramati, Pune address</span></div>
+    </div>
+    <div class="info"><b>Mode:</b> Offline &nbsp;•&nbsp; <b>Location:</b> Baramati, Pune &nbsp;•&nbsp; <b>Role:</b> Business Development Intern &nbsp;•&nbsp; Generates all 3 official documents in one ZIP bundle and sends email.</div>
+    <form id="f">
+      <div class="row">
+        <div class="field"><label>Candidate Name *</label><input name="candidate_name" required placeholder="e.g. Rahul Sharma"></div>
+        <div class="field"><label>Email</label><input name="email" type="email" placeholder="candidate@example.com"></div>
+        <div class="field"><label>Start Date *</label><input name="start_date" type="date" required></div>
+        <div class="field"><label>End Date *</label><input name="end_date" type="date" required></div>
+        <div class="field"><label>Issue Date</label><input name="issue_date" type="date" id="issueDate"></div>
+        <div class="field"><label>Credential ID</label><input name="credential_id" placeholder="Leave blank to auto-generate"></div>
+        <div class="field"><label>Role</label><input name="role" value="Business Development Intern"></div>
+        <div class="field"><label>Domain</label><input name="domain" value="Business Development"></div>
+      </div>
+      <button id="b" class="btn" type="submit">Generate All 3 Business Development Documents</button>
+      <div class="note">Downloads ZIP with Completion Certificate + Experience Letter + Letter of Recommendation. Email is delivered automatically via SMTP.</div>
+      <div id="m" class="msg"></div>
+    </form>
+  </div>
+</div>
+<script>
+document.getElementById('issueDate').value = new Date().toISOString().slice(0, 10);
+const f=document.getElementById('f'),b=document.getElementById('b'),m=document.getElementById('m');
+f.addEventListener('submit',async e=>{
+  e.preventDefault();
+  b.disabled=true;
+  b.textContent='Generating all 3 documents...';
+  m.style.display='none';
+  try{
+    const r=await fetch('/generate-business-development-templates',{method:'POST',body:new FormData(f)});
+    if(!r.ok){
+      const d=await r.json().catch(()=>({}));
+      throw new Error(d.error||`Server returned ${r.status}`);
+    }
+    const blob=await r.blob();
+    const fn=r.headers.get('X-Filename')||'Business_Development_Internship_Documents.zip';
+    const u=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=u;
+    a.download=fn;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(u);
+    const s=r.headers.get('X-Email-Status');
+    const id=r.headers.get('X-Credential-ID')||'';
+    m.className='msg '+(s==='failed'?'warning':'success');
+    m.innerHTML=s==='failed'?`Files downloaded successfully, but email delivery failed: ${r.headers.get('X-Email-Error')||'Check SMTP settings.'}<br>Credential ID: <b>${id}</b>`:`All 3 Business Development documents generated and downloaded successfully.<br>Credential ID: <b>${id}</b>${s==='sent'?'<br>✉️ Official email sent to candidate.':''}`;
+  }catch(err){
+    m.className='msg error';
+    m.textContent='Error: '+err.message;
+  }finally{
+    b.disabled=false;
+    b.textContent='Generate All 3 Business Development Documents';
+    m.style.display='block';
+  }
+});
+</script>
+</body>
+</html>
